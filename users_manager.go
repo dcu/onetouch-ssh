@@ -18,7 +18,7 @@ type UsersManagerListener interface {
 // UsersManager is in charge of adding/deleting/updating/listing users
 type UsersManager struct {
 	listeners []UsersManagerListener
-	config    *Config
+	config    *Database
 }
 
 var usersManagerInstance *UsersManager
@@ -27,7 +27,7 @@ var usersManagerInstance *UsersManager
 func NewUsersManager() *UsersManager {
 	if usersManagerInstance == nil {
 		usersManagerInstance = &UsersManager{
-			config: NewConfig(usersDbPath()),
+			config: NewDatabase(usersDbPath()),
 		}
 	}
 

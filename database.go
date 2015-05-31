@@ -7,23 +7,23 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
-// Config is a struct encapsulating the config.
-type Config struct {
+// Database is a struct encapsulating the config.
+type Database struct {
 	Path string
 }
 
-// ConfigData is the raw data that's going to be stored in the db.
-type ConfigData map[string]interface{}
+// DatabaseData is the raw data that's going to be stored in the db.
+type DatabaseData map[string]interface{}
 
-// ConfigItem is a map to store in the config.
-type ConfigItem interface {
-	ToMap() ConfigData
-	FromMap(ConfigData)
+// DatabaseItem is a map to store in the config.
+type DatabaseItem interface {
+	ToMap() DatabaseData
+	FromMap(DatabaseData)
 }
 
-// NewConfig creates a new config given a path.
-func NewConfig(path string) *Config {
-	config := &Config{
+// NewDatabase creates a new config given a path.
+func NewDatabase(path string) *Database {
+	config := &Database{
 		Path: path,
 	}
 
@@ -31,7 +31,7 @@ func NewConfig(path string) *Config {
 }
 
 // Put puts a value given a field.
-func (config *Config) Put(key string, item ConfigItem) error {
+func (config *Database) Put(key string, item DatabaseItem) error {
 	data, err := encodeData(item.ToMap())
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (config *Config) Put(key string, item ConfigItem) error {
 }
 
 // Get gets a value from the database given a key.
-func (config *Config) Get(key string, item ConfigItem) error {
+func (config *Database) Get(key string, item DatabaseItem) error {
 	db, err := config.openDB()
 	if err != nil {
 		return err
@@ -71,8 +71,8 @@ func (config *Config) Get(key string, item ConfigItem) error {
 }
 
 // List returns all config items
-func (config *Config) List() []ConfigData {
-	items := []ConfigData{}
+func (config *Database) List() []DatabaseData {
+	items := []DatabaseData{}
 
 	db, err := config.openDB()
 	if err != nil {
@@ -94,7 +94,7 @@ func (config *Config) List() []ConfigData {
 }
 
 // HasKeys returns true if the database has keys.
-func (config *Config) HasKeys() bool {
+func (config *Database) HasKeys() bool {
 	db, err := config.openDB()
 	if err != nil {
 		return false
@@ -134,7 +134,7 @@ func decodeData(data []byte) (map[string]interface{}, error) {
 	return item, nil
 }
 
-func (config *Config) openDB() (*leveldb.DB, error) {
+func (config *Database) openDB() (*leveldb.DB, error) {
 	db, err := leveldb.OpenFile(config.Path, nil)
 	if err != nil {
 		return nil, err

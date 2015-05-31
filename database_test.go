@@ -8,7 +8,7 @@ func Test_PutAndGet(t *testing.T) {
 	user := &User{
 		Username: "david",
 	}
-	config := NewConfig("/tmp/db")
+	config := NewDatabase("/tmp/db")
 
 	err := config.Put("key1", user)
 	if err != nil {

@@ -211,6 +211,8 @@ func (contents *Contents) updateUser() {
 	}
 	user.PhoneNumber = contents.getFormLineValue("phone number")[0]
 	user.PublicKeys = contents.getFormLineValue("public keys")
+
+	user.Register()
 }
 
 // OnUserSelected implements UsersListListener interface.

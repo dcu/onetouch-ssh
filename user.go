@@ -1,6 +1,8 @@
 package ssh
 
 import (
+	"errors"
+	//"github.com/dcu/go-authy"
 	"strconv"
 )
 
@@ -36,8 +38,8 @@ func (user *User) CountryCodeStr() string {
 }
 
 // ToMap converts the user to a map
-func (user *User) ToMap() ConfigData {
-	return ConfigData{
+func (user *User) ToMap() DatabaseData {
+	return DatabaseData{
 		"Username":    user.Username,
 		"AuthyID":     user.AuthyID,
 		"PublicKeys":  user.PublicKeys,
@@ -47,7 +49,7 @@ func (user *User) ToMap() ConfigData {
 }
 
 // FromMap loads the user using a map.
-func (user *User) FromMap(data ConfigData) {
+func (user *User) FromMap(data DatabaseData) {
 	if value := data["Username"]; value != nil {
 		user.Username = value.(string)
 	}
@@ -63,4 +65,15 @@ func (user *User) FromMap(data ConfigData) {
 	if value := data["PublicKeys"]; value != nil {
 		user.PublicKeys = value.([]string)
 	}
+}
+
+// Register register the user on Authy
+func (user *User) Register() error {
+	if len(user.PhoneNumber) == 0 || user.CountryCode == 0 {
+		return errors.New("Invalid phone number.")
+	}
+
+	//authyUser, err := authyApi.RegisterUser(authy.UserOpts{Email: email, PhoneNumber: cellphone, CountryCode: countryCode})
+
+	return nil
 }
