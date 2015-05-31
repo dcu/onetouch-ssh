@@ -7,9 +7,10 @@ import (
 // User is a struct contains the user's info.
 type User struct {
 	Username    string
-	PublicKey   string
+	PublicKeys  []string
 	CountryCode int
 	PhoneNumber string
+	AuthyID     int
 }
 
 // NewUser returns a new instance of User
@@ -38,7 +39,8 @@ func (user *User) CountryCodeStr() string {
 func (user *User) ToMap() ConfigData {
 	return ConfigData{
 		"Username":    user.Username,
-		"PublicKey":   user.PublicKey,
+		"AuthyID":     user.AuthyID,
+		"PublicKeys":  user.PublicKeys,
 		"CountryCode": user.CountryCode,
 		"PhoneNumber": user.PhoneNumber,
 	}
@@ -46,5 +48,19 @@ func (user *User) ToMap() ConfigData {
 
 // FromMap loads the user using a map.
 func (user *User) FromMap(data ConfigData) {
-	user.Username = data["Username"].(string)
+	if value := data["Username"]; value != nil {
+		user.Username = value.(string)
+	}
+	if value := data["AuthyID"]; value != nil {
+		user.AuthyID = value.(int)
+	}
+	if value := data["CountryCode"]; value != nil {
+		user.CountryCode = value.(int)
+	}
+	if value := data["PhoneNumber"]; value != nil {
+		user.PhoneNumber = value.(string)
+	}
+	if value := data["PublicKeys"]; value != nil {
+		user.PublicKeys = value.([]string)
+	}
 }

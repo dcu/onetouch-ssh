@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/authy/onetouch-ssh"
 	"github.com/jroimartin/gocui"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -70,6 +72,7 @@ func (contents *Contents) addFormInput(label string, y int, height int) {
 	view := contents.addFormLine(label, y, height)
 	view.Editable = true
 	view.Frame = true
+	view.Wrap = true
 
 	contents.formInputs = append(contents.formInputs, label)
 }
@@ -80,6 +83,13 @@ func (contents *Contents) setFormLineValue(label string, value string) {
 
 	view.Clear()
 	fmt.Fprintf(view, value)
+}
+
+func (contents *Contents) getFormLineValue(label string) []string {
+	id := contents.idForInput(label)
+	view, _ := contents.gui.View(id)
+
+	return strings.Split(view.Buffer(), "\n")
 }
 
 func (contents *Contents) setHelp() {
@@ -113,7 +123,6 @@ func (contents *Contents) setupKeyBindings() {
 
 func (contents *Contents) nextFormInput(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
-		v.EditDelete(true)
 	}
 
 	nextPos := (contents.currentInputIndex + 1) % len(contents.formInputs)
@@ -126,8 +135,15 @@ func (contents *Contents) nextFormInput(g *gocui.Gui, v *gocui.View) error {
 
 func (contents *Contents) finishEditing(g *gocui.Gui, v *gocui.View) error {
 	contents.clearSelection()
+	contents.updateUser()
 
-	err := g.SetCurrentView(listViewID)
+	manager := ssh.NewUsersManager()
+	err := manager.UpdateUser(contents.user)
+	if err != nil {
+		panic(err)
+	}
+
+	err = g.SetCurrentView(listViewID)
 	if err != nil {
 		panic(err)
 	}
@@ -165,8 +181,8 @@ func (contents *Contents) setFormInput(label string) {
 		if label == e {
 			contents.currentInputIndex = index
 			contents.gui.SetCurrentView(viewID)
-			view.BgColor = gocui.ColorWhite
-			view.FgColor = gocui.ColorBlack
+			//view.BgColor = gocui.ColorWhite
+			//view.FgColor = gocui.ColorBlack
 
 			contents.setHelp()
 		} else {
@@ -182,8 +198,19 @@ func (contents *Contents) refresh() {
 	contents.setFormLineValue("authy id", "<not set>")
 	contents.setFormLineValue("country code", user.CountryCodeStr())
 	contents.setFormLineValue("phone number", user.PhoneNumber)
-	contents.setFormLineValue("public keys", user.PublicKey)
+	contents.setFormLineValue("public keys", strings.Join(user.PublicKeys, "\n"))
+}
 
+func (contents *Contents) updateUser() {
+	user := contents.user
+	countryCode, err := strconv.Atoi(contents.getFormLineValue("country code")[0])
+	if err != nil {
+		panic(err)
+	} else {
+		user.CountryCode = countryCode
+	}
+	user.PhoneNumber = contents.getFormLineValue("phone number")[0]
+	user.PublicKeys = contents.getFormLineValue("public keys")
 }
 
 // OnUserSelected implements UsersListListener interface.
@@ -195,4 +222,42 @@ func (contents *Contents) OnUserSelected(user *ssh.User) {
 // OnStartEditingUser implements UsersListListener interface.
 func (contents *Contents) OnStartEditingUser(user *ssh.User) {
 	contents.setFormInput("country code")
+}
+
+func editor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+	switch {
+	case ch != 0 && mod == 0:
+		v.EditWrite(ch)
+	case key == gocui.KeySpace:
+		v.EditWrite(' ')
+	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
+		v.EditDelete(true)
+	case key == gocui.KeyDelete:
+		v.EditDelete(false)
+	case key == gocui.KeyInsert:
+		v.Overwrite = !v.Overwrite
+	case key == gocui.KeyArrowDown:
+		_, y := v.Cursor()
+		_, h := v.Size()
+		lines := strings.Count(v.Buffer(), "\n")
+
+		if y+1 < lines || lines < h {
+			v.MoveCursor(0, 1, false)
+		}
+	case key == gocui.KeyArrowUp:
+		v.MoveCursor(0, -1, false)
+	case key == gocui.KeyArrowLeft:
+		v.MoveCursor(-1, 0, false)
+	case key == gocui.KeyArrowRight:
+		x, y := v.Cursor()
+		line, _ := v.Line(y)
+
+		if x < len(line) {
+			v.MoveCursor(1, 0, false)
+		}
+	}
+}
+
+func init() {
+	gocui.Edit = editor
 }

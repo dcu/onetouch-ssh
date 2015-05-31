@@ -39,6 +39,22 @@ func (manager *UsersManager) AddListener(listener UsersManagerListener) {
 	manager.listeners = append(manager.listeners, listener)
 }
 
+// UpdateUser updates the given user
+func (manager *UsersManager) UpdateUser(user *User) error {
+	if len(user.Username) == 0 {
+		return errors.New("Username can't be empty.")
+	}
+
+	err := manager.config.Put(user.Username, user)
+	if err == nil {
+		//manager.onUserAdded(user)
+		return nil
+	}
+
+	return err
+
+}
+
 // AddUser adds a new user
 func (manager *UsersManager) AddUser(user *User) error {
 	if len(user.Username) == 0 {
@@ -76,7 +92,10 @@ func (manager *UsersManager) Users() []*User {
 // LoadUser loads a user using the given username
 func (manager *UsersManager) LoadUser(username string) *User {
 	user := &User{}
-	manager.config.Get(username, user)
+	err := manager.config.Get(username, user)
+	if err != nil {
+		panic(err)
+	}
 
 	return user
 }
