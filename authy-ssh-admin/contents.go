@@ -41,9 +41,10 @@ func (contents *Contents) drawLayout() {
 
 	contents.addFormLine("username", 0, 2)
 	contents.addFormLine("authy id", 3, 2)
-	contents.addFormInput("country code", 6, 2)
-	contents.addFormInput("phone number", 9, 2)
-	contents.addFormInput("public keys", 12, maxY-16)
+	contents.addFormInput("email", 6, 2)
+	contents.addFormInput("country code", 9, 2)
+	contents.addFormInput("phone number", 12, 2)
+	contents.addFormInput("public keys", 15, maxY-18)
 }
 
 func (contents *Contents) addFormLine(label string, y int, height int) *gocui.View {
@@ -143,6 +144,7 @@ func (contents *Contents) finishEditing(g *gocui.Gui, v *gocui.View) error {
 		panic(err)
 	}
 
+	contents.refresh()
 	err = g.SetCurrentView(listViewID)
 	if err != nil {
 		panic(err)
@@ -195,7 +197,8 @@ func (contents *Contents) setFormInput(label string) {
 func (contents *Contents) refresh() {
 	user := contents.user
 	contents.setFormLineValue("username", user.Username)
-	contents.setFormLineValue("authy id", "<not set>")
+	contents.setFormLineValue("authy id", user.AuthyIDStr())
+	contents.setFormLineValue("email", user.Email)
 	contents.setFormLineValue("country code", user.CountryCodeStr())
 	contents.setFormLineValue("phone number", user.PhoneNumber)
 	contents.setFormLineValue("public keys", strings.Join(user.PublicKeys, "\n"))
@@ -209,6 +212,7 @@ func (contents *Contents) updateUser() {
 	} else {
 		user.CountryCode = countryCode
 	}
+	user.Email = contents.getFormLineValue("email")[0]
 	user.PhoneNumber = contents.getFormLineValue("phone number")[0]
 	user.PublicKeys = contents.getFormLineValue("public keys")
 
@@ -223,7 +227,7 @@ func (contents *Contents) OnUserSelected(user *ssh.User) {
 
 // OnStartEditingUser implements UsersListListener interface.
 func (contents *Contents) OnStartEditingUser(user *ssh.User) {
-	contents.setFormInput("country code")
+	contents.setFormInput("email")
 }
 
 func editor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {

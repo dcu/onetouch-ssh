@@ -2,7 +2,8 @@ package ssh
 
 import (
 	"errors"
-	//"github.com/dcu/go-authy"
+	"github.com/dcu/go-authy"
+	"net/url"
 	"strconv"
 )
 
@@ -10,6 +11,7 @@ import (
 type User struct {
 	Username    string
 	PublicKeys  []string
+	Email       string
 	CountryCode int
 	PhoneNumber string
 	AuthyID     int
@@ -37,11 +39,21 @@ func (user *User) CountryCodeStr() string {
 	return strconv.Itoa(user.CountryCode)
 }
 
+// AuthyIDStr returns the authy id as a string.
+func (user *User) AuthyIDStr() string {
+	if user.AuthyID == 0 {
+		return "<not set>"
+	}
+
+	return strconv.Itoa(user.AuthyID)
+}
+
 // ToMap converts the user to a map
 func (user *User) ToMap() DatabaseData {
 	return DatabaseData{
 		"Username":    user.Username,
 		"AuthyID":     user.AuthyID,
+		"Email":       user.Email,
 		"PublicKeys":  user.PublicKeys,
 		"CountryCode": user.CountryCode,
 		"PhoneNumber": user.PhoneNumber,
@@ -55,6 +67,9 @@ func (user *User) FromMap(data DatabaseData) {
 	}
 	if value := data["AuthyID"]; value != nil {
 		user.AuthyID = value.(int)
+	}
+	if value := data["Email"]; value != nil {
+		user.Email = value.(string)
 	}
 	if value := data["CountryCode"]; value != nil {
 		user.CountryCode = value.(int)
@@ -73,7 +88,15 @@ func (user *User) Register() error {
 		return errors.New("Invalid phone number.")
 	}
 
-	//authyUser, err := authyApi.RegisterUser(authy.UserOpts{Email: email, PhoneNumber: cellphone, CountryCode: countryCode})
+	config := NewConfig()
+	api := authy.NewAuthyApi(config.AuthyAPIKey())
+	api.ApiUrl = "https://staging-2.authy.com"
 
+	authyUser, err := api.RegisterUser(user.Email, user.CountryCode, user.PhoneNumber, url.Values{})
+	if err != nil {
+		return err
+	}
+
+	user.AuthyID = authyUser.Id
 	return nil
 }

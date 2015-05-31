@@ -7,7 +7,9 @@ import (
 )
 
 var (
-	listViewID         = "users-list"
+	listViewID = "users-list"
+
+	addUserBgViewID    = "add-user-background"
 	addUserViewID      = "add-user"
 	addUserViewLabelID = "add-user-label"
 	addUserViewInputID = "add-user-input"
@@ -35,7 +37,7 @@ func NewUsersList(g *gocui.Gui) *UsersList {
 }
 
 func (list *UsersList) setHelp() {
-	setHelp(list.gui, `enter: edit user | up/down: select user | ctrl-c close app`)
+	setHelp(list.gui, `ctrl-a: add user | enter: edit user | up/down: select user | ctrl-c close app`)
 }
 
 // AddListener adds a listener for list's events.
@@ -73,7 +75,10 @@ func (list *UsersList) usernameToAdd() string {
 		panic(err)
 	}
 
-	username, _ := v.Line(-1)
+	username, err := v.Line(0)
+	if err != nil {
+		return ""
+	}
 
 	return username
 }
@@ -81,6 +86,7 @@ func (list *UsersList) usernameToAdd() string {
 func (list *UsersList) setupKeyBindings() {
 	list.gui.SetKeybinding(addUserViewInputID, gocui.KeyEnter, gocui.ModNone, list.validateAndAddUser)
 	list.gui.SetKeybinding(addUserViewInputID, gocui.KeyCtrlU, gocui.ModNone, clearView)
+	list.gui.SetKeybinding(addUserViewInputID, gocui.KeyCtrlD, gocui.ModNone, list.cancelAddUser)
 
 	list.gui.SetKeybinding(listViewID, gocui.KeyEnter, gocui.ModNone, list.editCurrentUser)
 	list.gui.SetKeybinding(listViewID, gocui.KeyArrowDown, gocui.ModNone, list.cursorDown)
@@ -89,6 +95,10 @@ func (list *UsersList) setupKeyBindings() {
 
 func (list *UsersList) showAddUserView(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := g.Size()
+
+	if v, err := g.SetView(addUserBgViewID, -1, -1, maxX, maxY); err != nil {
+		v.BgColor = gocui.ColorWhite
+	}
 
 	if v, err := g.SetView(addUserViewID, maxX/2-30, maxY/2, maxX/2+30, maxY/2+2); err != nil {
 		v.Editable = false
@@ -111,15 +121,25 @@ func (list *UsersList) showAddUserView(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (list *UsersList) validateAndAddUser(g *gocui.Gui, v *gocui.View) error {
-	username := list.usernameToAdd()
-
+func (list *UsersList) cancelAddUser(g *gocui.Gui, v *gocui.View) error {
 	g.DeleteView(addUserViewID)
 	g.DeleteView(addUserViewLabelID)
 	g.DeleteView(addUserViewInputID)
+	g.DeleteView(addUserBgViewID)
+
+	g.SetCurrentView(listViewID)
+	return nil
+}
+
+func (list *UsersList) validateAndAddUser(g *gocui.Gui, v *gocui.View) error {
+	username := list.usernameToAdd()
+	list.cancelAddUser(g, v)
+
+	if username == "" {
+		return nil
+	}
 
 	v = list.view()
-	g.SetCurrentView(listViewID)
 
 	manager := ssh.NewUsersManager()
 	user := ssh.NewUser(username)
@@ -129,6 +149,8 @@ func (list *UsersList) validateAndAddUser(g *gocui.Gui, v *gocui.View) error {
 		fmt.Fprintln(v, username)
 		return nil
 	}
+
+	panic(err)
 
 	return nil
 }
@@ -150,12 +172,14 @@ func (list *UsersList) focus() {
 	list.gui.SetCurrentView(listViewID)
 
 	list.selectCurrentUser(list.gui, v)
-
-	list.setHelp()
 }
 
 func (list *UsersList) selectCurrentUser(g *gocui.Gui, v *gocui.View) error {
+	list.setHelp()
 	username := list.selectedUsername()
+	if username == "" {
+		return nil
+	}
 
 	manager := ssh.NewUsersManager()
 	user := manager.LoadUser(username)

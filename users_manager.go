@@ -47,7 +47,6 @@ func (manager *UsersManager) UpdateUser(user *User) error {
 
 	err := manager.config.Put(user.Username, user)
 	if err == nil {
-		//manager.onUserAdded(user)
 		return nil
 	}
 
@@ -91,6 +90,10 @@ func (manager *UsersManager) Users() []*User {
 
 // LoadUser loads a user using the given username
 func (manager *UsersManager) LoadUser(username string) *User {
+	if username == "" {
+		return nil
+	}
+
 	user := &User{}
 	err := manager.config.Get(username, user)
 	if err != nil {
@@ -101,7 +104,7 @@ func (manager *UsersManager) LoadUser(username string) *User {
 }
 
 func usersDbPath() string {
-	return findUserHome() + "/.authy-onetouch"
+	return findUserHome() + "/.authy-onetouch/users/"
 }
 
 func findUserHome() string {
