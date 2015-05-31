@@ -22,6 +22,7 @@ type UsersList struct {
 // UsersListListener is a interface for listing users list events.
 type UsersListListener interface {
 	OnUserSelected(user *ssh.User)
+	OnStartEditingUser(user *ssh.User)
 }
 
 // NewUsersList creates an instance of the UsersList
@@ -77,9 +78,9 @@ func (list *UsersList) setupKeyBindings() {
 	list.gui.SetKeybinding(addUserViewInputID, gocui.KeyEnter, gocui.ModNone, list.validateAndAddUser)
 	list.gui.SetKeybinding(addUserViewInputID, gocui.KeyCtrlU, gocui.ModNone, clearView)
 
-	list.gui.SetKeybinding(listViewID, gocui.KeyEnter, gocui.ModNone, list.selectCurrentUser)
-	list.gui.SetKeybinding(listViewID, gocui.KeyArrowDown, gocui.ModNone, cursorDown)
-	list.gui.SetKeybinding(listViewID, gocui.KeyArrowUp, gocui.ModNone, cursorUp)
+	list.gui.SetKeybinding(listViewID, gocui.KeyEnter, gocui.ModNone, list.editCurrentUser)
+	list.gui.SetKeybinding(listViewID, gocui.KeyArrowDown, gocui.ModNone, list.cursorDown)
+	list.gui.SetKeybinding(listViewID, gocui.KeyArrowUp, gocui.ModNone, list.cursorUp)
 }
 
 func (list *UsersList) showAddUserView(g *gocui.Gui, v *gocui.View) error {
@@ -157,5 +158,30 @@ func (list *UsersList) selectCurrentUser(g *gocui.Gui, v *gocui.View) error {
 		listener.OnUserSelected(user)
 	}
 
+	return nil
+}
+
+func (list *UsersList) editCurrentUser(g *gocui.Gui, v *gocui.View) error {
+	username := list.selectedUsername()
+
+	manager := ssh.NewUsersManager()
+	user := manager.LoadUser(username)
+
+	for _, listener := range list.listeners {
+		listener.OnStartEditingUser(user)
+	}
+
+	return nil
+}
+
+func (list *UsersList) cursorUp(g *gocui.Gui, v *gocui.View) error {
+	cursorUp(g, v)
+	list.selectCurrentUser(g, v)
+	return nil
+}
+
+func (list *UsersList) cursorDown(g *gocui.Gui, v *gocui.View) error {
+	cursorDown(g, v)
+	list.selectCurrentUser(g, v)
 	return nil
 }

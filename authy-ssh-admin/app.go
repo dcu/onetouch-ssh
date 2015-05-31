@@ -22,10 +22,6 @@ func NewApp() *App {
 	app.configureViews()
 
 	app.gui.SetLayout(app.drawLayout)
-	if err := app.keyBindings(); err != nil {
-		panic(err)
-	}
-
 	return app
 }
 
@@ -84,6 +80,11 @@ func (app *App) drawLayout(g *gocui.Gui) error {
 			app.UsersList.showAddUserView(app.gui, nil)
 		}
 		app.started = true
+
+		if err := app.keyBindings(); err != nil {
+			panic(err)
+		}
+
 	}
 
 	return nil
