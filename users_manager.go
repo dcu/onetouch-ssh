@@ -19,8 +19,6 @@ type UsersManagerListener interface {
 type UsersManager struct {
 	listeners []UsersManagerListener
 	config    *Config
-
-	users map[string]*User
 }
 
 var usersManagerInstance *UsersManager
@@ -30,7 +28,6 @@ func NewUsersManager() *UsersManager {
 	if usersManagerInstance == nil {
 		usersManagerInstance = &UsersManager{
 			config: NewConfig(usersDbPath()),
-			users:  make(map[string]*User),
 		}
 	}
 
@@ -57,6 +54,11 @@ func (manager *UsersManager) AddUser(user *User) error {
 	return err
 }
 
+// HasUsers returns true if the manager has users.
+func (manager *UsersManager) HasUsers() bool {
+	return manager.config.HasKeys()
+}
+
 // Users returns the list of users
 func (manager *UsersManager) Users() []*User {
 	users := []*User{}
@@ -69,6 +71,14 @@ func (manager *UsersManager) Users() []*User {
 	}
 
 	return users
+}
+
+// LoadUser loads a user using the given username
+func (manager *UsersManager) LoadUser(username string) *User {
+	user := &User{}
+	manager.config.Get(username, user)
+
+	return user
 }
 
 func usersDbPath() string {

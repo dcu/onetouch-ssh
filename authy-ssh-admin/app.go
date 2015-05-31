@@ -10,14 +10,26 @@ type App struct {
 	gui       *gocui.Gui
 	UsersList *UsersList
 	Contents  *Contents
+	started   bool
 }
 
 // NewApp Instantiates a new App
 func NewApp() *App {
 	app := &App{}
-	app.UsersList = app.NewUsersList()
-	app.Contents = app.NewContents()
+	app.initGUI()
 
+	ssh.NewUsersManager().AddListener(app)
+	app.configureViews()
+
+	app.gui.SetLayout(app.drawLayout)
+	if err := app.keyBindings(); err != nil {
+		panic(err)
+	}
+
+	return app
+}
+
+func (app *App) initGUI() {
 	app.gui = gocui.NewGui()
 	if err := app.gui.Init(); err != nil {
 		panic(err)
@@ -25,17 +37,15 @@ func NewApp() *App {
 
 	app.gui.SelBgColor = gocui.ColorGreen
 	app.gui.SelFgColor = gocui.ColorBlack
-
-	app.gui.SetLayout(app.drawLayout)
-	if err := app.keyBindings(); err != nil {
-		panic(err)
-	}
-
 	app.gui.ShowCursor = true
+}
 
-	ssh.NewUsersManager().AddListener(app)
+func (app *App) configureViews() {
+	app.UsersList = NewUsersList(app.gui)
+	app.Contents = NewContents(app.gui)
 
-	return app
+	app.UsersList.AddListener(app.Contents)
+
 }
 
 // Start starts the application
@@ -63,6 +73,17 @@ func (app *App) drawLayout(g *gocui.Gui) error {
 		v.Frame = false
 		v.BgColor = gocui.ColorWhite
 		v.FgColor = gocui.ColorBlack
+	}
+
+	if !app.started {
+		manager := ssh.NewUsersManager()
+
+		if manager.HasUsers() {
+			app.UsersList.focus()
+		} else {
+			app.UsersList.showAddUserView(app.gui, nil)
+		}
+		app.started = true
 	}
 
 	return nil

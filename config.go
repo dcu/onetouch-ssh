@@ -93,6 +93,21 @@ func (config *Config) List() []ConfigData {
 	return items
 }
 
+// HasKeys returns true if the database has keys.
+func (config *Config) HasKeys() bool {
+	db, err := config.openDB()
+	if err != nil {
+		return false
+	}
+	defer db.Close()
+	iter := db.NewIterator(nil, nil)
+
+	hasKeys := iter.Next()
+	iter.Release()
+
+	return hasKeys
+}
+
 func encodeData(data map[string]interface{}) ([]byte, error) {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
