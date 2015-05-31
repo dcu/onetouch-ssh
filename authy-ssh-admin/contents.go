@@ -36,9 +36,10 @@ func (contents *Contents) drawLayout() {
 	}
 
 	contents.addFormLine("username", 0, 2)
-	contents.addFormInput("country code", 3, 2)
-	contents.addFormInput("phone number", 6, 2)
-	contents.addFormInput("public keys", 9, maxY-14)
+	contents.addFormLine("authy id", 3, 2)
+	contents.addFormInput("country code", 6, 2)
+	contents.addFormInput("phone number", 9, 2)
+	contents.addFormInput("public keys", 12, maxY-16)
 }
 
 func (contents *Contents) addFormLine(label string, y int, height int) *gocui.View {
@@ -56,7 +57,7 @@ func (contents *Contents) addFormLine(label string, y int, height int) *gocui.Vi
 	inputID := contents.idForInput(label)
 	v, err := g.SetView(inputID, columnWidth+20, y, maxX-1, y+height)
 	if err != nil {
-		v.Frame = true
+		v.Frame = false
 		v.Editable = false
 	}
 
@@ -66,8 +67,17 @@ func (contents *Contents) addFormLine(label string, y int, height int) *gocui.Vi
 func (contents *Contents) addFormInput(label string, y int, height int) {
 	view := contents.addFormLine(label, y, height)
 	view.Editable = true
+	view.Frame = true
 
 	contents.formInputs = append(contents.formInputs, label)
+}
+
+func (contents *Contents) setFormLineValue(label string, value string) {
+	id := contents.idForInput(label)
+	view, _ := contents.gui.View(id)
+
+	view.Clear()
+	fmt.Fprintf(view, value)
 }
 
 func (contents *Contents) idForInput(label string) string {
@@ -86,6 +96,7 @@ func (contents *Contents) view(id string) *gocui.View {
 func (contents *Contents) setupKeyBindings() {
 	for _, label := range contents.formInputs {
 		id := contents.idForInput(label)
+		contents.gui.SetKeybinding(id, gocui.KeyCtrlS, gocui.ModNone, contents.finishEditing)
 		contents.gui.SetKeybinding(id, gocui.KeyEnter, gocui.ModNone, contents.nextFormInput)
 	}
 }
@@ -101,6 +112,25 @@ func (contents *Contents) nextFormInput(g *gocui.Gui, v *gocui.View) error {
 	contents.setFormInput(nextLabel)
 
 	return nil
+}
+
+func (contents *Contents) finishEditing(g *gocui.Gui, v *gocui.View) error {
+	contents.clearSelection()
+	err := g.SetCurrentView(listViewID)
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
+
+func (contents *Contents) currentFormInput() *gocui.View {
+	label := contents.formInputs[contents.currentInputIndex]
+	id := contents.idForInput(label)
+	return contents.view(id)
+}
+
+func (contents *Contents) clearSelection() {
+	contents.setFormInput("")
 }
 
 func (contents *Contents) setFormInput(label string) {
@@ -125,11 +155,11 @@ func (contents *Contents) setFormInput(label string) {
 
 // OnUserSelected implements UsersListListener interface.
 func (contents *Contents) OnUserSelected(user *ssh.User) {
-	usernameInputID := contents.idForInput("username")
-	v := contents.view(usernameInputID)
-
-	v.Clear()
-	fmt.Fprintln(v, user.Username)
+	contents.setFormLineValue("username", user.Username)
+	contents.setFormLineValue("authy id", "<not set>")
+	contents.setFormLineValue("country code", user.CountryCodeStr())
+	contents.setFormLineValue("phone number", user.PhoneNumber)
+	contents.setFormLineValue("public keys", user.PublicKey)
 }
 
 // OnStartEditingUser implements UsersListListener interface.

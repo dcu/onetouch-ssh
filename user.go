@@ -1,10 +1,14 @@
 package ssh
 
+import (
+	"strconv"
+)
+
 // User is a struct contains the user's info.
 type User struct {
 	Username    string
 	PublicKey   string
-	CountryCode uint16
+	CountryCode int
 	PhoneNumber string
 }
 
@@ -19,6 +23,15 @@ func NewUser(username string) *User {
 // Save saves the user
 func Save() bool {
 	return false
+}
+
+// CountryCodeStr returns the country code as a string.
+func (user *User) CountryCodeStr() string {
+	if user.CountryCode == 0 {
+		return ""
+	}
+
+	return strconv.Itoa(user.CountryCode)
 }
 
 // ToMap converts the user to a map
