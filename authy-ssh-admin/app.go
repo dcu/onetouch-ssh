@@ -71,6 +71,12 @@ func (app *App) drawLayout(g *gocui.Gui) error {
 		v.FgColor = gocui.ColorBlack
 	}
 
+	if v, err := g.SetView("help-line", maxX-65, maxY-3, maxX, maxY-1); err != nil {
+		v.Frame = false
+		v.BgColor = gocui.ColorGreen
+		v.FgColor = gocui.ColorBlack
+	}
+
 	if !app.started {
 		manager := ssh.NewUsersManager()
 

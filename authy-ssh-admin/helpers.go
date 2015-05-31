@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jroimartin/gocui"
 )
 
@@ -39,4 +40,11 @@ func clearView(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	return nil
+}
+
+func setHelp(gui *gocui.Gui, help string) {
+	view, _ := gui.View("help-line")
+
+	view.Clear()
+	fmt.Fprintf(view, " "+help)
 }

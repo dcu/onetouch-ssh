@@ -16,6 +16,8 @@ type Contents struct {
 
 	formInputs        []string
 	currentInputIndex int
+
+	user *ssh.User
 }
 
 // NewContents creates an instance of the Contents
@@ -80,6 +82,13 @@ func (contents *Contents) setFormLineValue(label string, value string) {
 	fmt.Fprintf(view, value)
 }
 
+func (contents *Contents) setHelp() {
+	setHelp(
+		contents.gui,
+		`enter: next field | ctrl-s: save user | ctrl-d discard changes`,
+	)
+}
+
 func (contents *Contents) idForInput(label string) string {
 	return contentsViewID + "-input-" + label
 }
@@ -97,6 +106,7 @@ func (contents *Contents) setupKeyBindings() {
 	for _, label := range contents.formInputs {
 		id := contents.idForInput(label)
 		contents.gui.SetKeybinding(id, gocui.KeyCtrlS, gocui.ModNone, contents.finishEditing)
+		contents.gui.SetKeybinding(id, gocui.KeyCtrlD, gocui.ModNone, contents.dischardChanges)
 		contents.gui.SetKeybinding(id, gocui.KeyEnter, gocui.ModNone, contents.nextFormInput)
 	}
 }
@@ -115,6 +125,17 @@ func (contents *Contents) nextFormInput(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (contents *Contents) finishEditing(g *gocui.Gui, v *gocui.View) error {
+	contents.clearSelection()
+
+	err := g.SetCurrentView(listViewID)
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
+
+func (contents *Contents) dischardChanges(g *gocui.Gui, v *gocui.View) error {
+	contents.refresh()
 	contents.clearSelection()
 	err := g.SetCurrentView(listViewID)
 	if err != nil {
@@ -146,6 +167,8 @@ func (contents *Contents) setFormInput(label string) {
 			contents.gui.SetCurrentView(viewID)
 			view.BgColor = gocui.ColorWhite
 			view.FgColor = gocui.ColorBlack
+
+			contents.setHelp()
 		} else {
 			view.BgColor = gocui.ColorDefault
 			view.FgColor = gocui.ColorDefault
@@ -153,13 +176,20 @@ func (contents *Contents) setFormInput(label string) {
 	}
 }
 
-// OnUserSelected implements UsersListListener interface.
-func (contents *Contents) OnUserSelected(user *ssh.User) {
+func (contents *Contents) refresh() {
+	user := contents.user
 	contents.setFormLineValue("username", user.Username)
 	contents.setFormLineValue("authy id", "<not set>")
 	contents.setFormLineValue("country code", user.CountryCodeStr())
 	contents.setFormLineValue("phone number", user.PhoneNumber)
 	contents.setFormLineValue("public keys", user.PublicKey)
+
+}
+
+// OnUserSelected implements UsersListListener interface.
+func (contents *Contents) OnUserSelected(user *ssh.User) {
+	contents.user = user
+	contents.refresh()
 }
 
 // OnStartEditingUser implements UsersListListener interface.

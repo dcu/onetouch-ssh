@@ -34,6 +34,10 @@ func NewUsersList(g *gocui.Gui) *UsersList {
 	return list
 }
 
+func (list *UsersList) setHelp() {
+	setHelp(list.gui, `enter: edit user | up/down: select user | ctrl-c close app`)
+}
+
 // AddListener adds a listener for list's events.
 func (list *UsersList) AddListener(listener UsersListListener) {
 	list.listeners = append(list.listeners, listener)
@@ -146,6 +150,8 @@ func (list *UsersList) focus() {
 	list.gui.SetCurrentView(listViewID)
 
 	list.selectCurrentUser(list.gui, v)
+
+	list.setHelp()
 }
 
 func (list *UsersList) selectCurrentUser(g *gocui.Gui, v *gocui.View) error {
