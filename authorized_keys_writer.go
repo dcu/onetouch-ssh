@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -40,7 +41,7 @@ func (writer *AuthorizedKeysWriter) Write() {
 		for _, pk := range user.PublicKeys {
 			if pk != "" {
 				pk = strings.Trim(pk, " ")
-				cmd := "authy-shell"
+				cmd := fmt.Sprintf("authy-shell %d", user.AuthyID)
 				w.WriteString(`command="` + cmd + `" ` + pk + "\n")
 			}
 		}
