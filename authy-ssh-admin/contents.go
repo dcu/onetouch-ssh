@@ -73,7 +73,7 @@ func (contents *Contents) addFormInput(label string, y int, height int) {
 	view := contents.addFormLine(label, y, height)
 	view.Editable = true
 	view.Frame = true
-	view.Wrap = true
+	view.Wrap = false
 
 	contents.formInputs = append(contents.formInputs, label)
 }

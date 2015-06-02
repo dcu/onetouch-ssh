@@ -2,10 +2,6 @@ package ssh
 
 import (
 	"errors"
-	"fmt"
-	"os"
-	"os/user"
-	"regexp"
 )
 
 var ()
@@ -78,8 +74,6 @@ func (manager *UsersManager) HasUsers() bool {
 func (manager *UsersManager) Users() []*User {
 	users := []*User{}
 	for _, data := range manager.config.List() {
-		fmt.Printf("%#v\n", data)
-
 		user := &User{}
 		user.FromMap(data)
 		users = append(users, user)
@@ -105,29 +99,6 @@ func (manager *UsersManager) LoadUser(username string) *User {
 
 func usersDbPath() string {
 	return findUserHome() + "/.authy-onetouch/users/"
-}
-
-func findUserHome() string {
-	var homeDir string
-
-	user, err := user.Current()
-	if err == nil {
-		homeDir = user.HomeDir
-	}
-
-	if homeDir == "" {
-		homeDir = os.Getenv("HOME")
-	}
-
-	if homeDir == "" {
-		wd, _ := os.Getwd()
-		homeRx := regexp.MustCompile(`^/home/[^/]+`)
-
-		matches := homeRx.FindStringSubmatch(wd)
-		homeDir = matches[0]
-	}
-
-	return homeDir
 }
 
 func (manager *UsersManager) onUserAdded(user *User) {

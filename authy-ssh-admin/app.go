@@ -106,10 +106,17 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 func (app *App) keyBindings() error {
 	app.gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
 	app.gui.SetKeybinding("", gocui.KeyCtrlA, gocui.ModNone, app.UsersList.showAddUserView)
+	app.gui.SetKeybinding("", gocui.KeyCtrlW, gocui.ModNone, app.writeAuthorizedKeys)
 
 	app.UsersList.setupKeyBindings()
 	app.Contents.setupKeyBindings()
 
+	return nil
+}
+
+func (app *App) writeAuthorizedKeys(g *gocui.Gui, v *gocui.View) error {
+	writer := ssh.NewAuthorizedKeysWriter()
+	writer.Write()
 	return nil
 }
 
