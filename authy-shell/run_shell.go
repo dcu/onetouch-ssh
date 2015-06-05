@@ -83,6 +83,12 @@ func isInteractiveConnection() bool {
 	return false
 }
 
+func printMessage(message string, args ...interface{}) {
+	if isInteractiveConnection() {
+		fmt.Printf(message, args...)
+	}
+}
+
 func parseGitCommand(command string) (typ string, repo string) {
 	result := gitCmdRx.FindStringSubmatch(command)
 

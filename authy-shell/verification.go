@@ -46,12 +46,16 @@ func (verification *Verification) sendApprovalRequest() *ApprovalRequest {
 }
 
 func (verification *Verification) perform() {
+	printMessage("Sending approval request to your device... ")
 	approvalRequest := verification.sendApprovalRequest()
+	printMessage("[sent]\n")
 
-	status := approvalRequest.CheckStatus(60 * time.Second)
+	status := approvalRequest.CheckStatus(30 * time.Second)
 	if status == StatusApproved {
 		runShell()
 	} else if status == StatusPending && isInteractiveConnection() {
+		printMessage("You didn't confirm the request. ")
+		printMessage("A text-message was sent to your phone.\n")
 		code := verification.askTOTPCode()
 		if verification.verifyCode(code) {
 			runShell()

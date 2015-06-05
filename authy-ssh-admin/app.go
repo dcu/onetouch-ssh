@@ -116,7 +116,7 @@ func (app *App) keyBindings() error {
 
 func (app *App) writeAuthorizedKeys(g *gocui.Gui, v *gocui.View) error {
 	writer := ssh.NewAuthorizedKeysWriter()
-	writer.Write()
+	writer.WriteToDefaultLocation()
 	return nil
 }
 
