@@ -5,7 +5,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"syscall"
+)
+
+var (
+	gitCmdRx = regexp.MustCompile(`^(git-receive-pack|git-upload-pack) '(.*)'$`)
 )
 
 func runShell() {
@@ -76,4 +81,19 @@ func isInteractiveConnection() bool {
 	}
 
 	return false
+}
+
+func parseGitCommand(command string) (typ string, repo string) {
+	result := gitCmdRx.FindStringSubmatch(command)
+
+	if len(result) == 3 {
+		if result[1] == "git-receive-pack" {
+			typ = "push"
+		} else {
+			typ = "fetch"
+		}
+		return typ, result[2]
+	}
+
+	return "", ""
 }

@@ -35,22 +35,18 @@ type ApprovalRequest struct {
 }
 
 func buildParams() url.Values {
+	hostname := runCommand("hostname")
 	sshConnection := strings.Split(os.Getenv("SSH_CONNECTION"), " ")
 	clientIP := ""
 	serverIP := ""
+
 	if len(sshConnection) > 1 {
-		clientIP = sshConnection[0]
-		if clientIP == "::1" || serverIP == "127.0.0.1" {
-			clientIP = "localhost"
-		}
+		clientIP = formatIPAndLocation(sshConnection[0])
 	}
-	if len(sshConnection) > 3 {
-		serverIP = sshConnection[2]
-		if serverIP == "::1" || serverIP == "127.0.0.1" {
-			serverIP = "localhost"
-		}
+
+	if len(sshConnection) > 2 {
+		serverIP = formatIPAndLocation(sshConnection[2])
 	}
-	hostname := runCommand("hostname")
 
 	params := url.Values{
 		"details[Type]":      {"SSH Server"},
@@ -59,10 +55,18 @@ func buildParams() url.Values {
 		"details[User]":      {os.Getenv("USER")},
 		"logos[][res]":       {"default"},
 		"logos[][url]":       {"http://authy-assets-dev.s3.amazonaws.com/authenticator/ipad/logo/high/liberty_bank@2x.png"},
-		"message":            {fmt.Sprintf("You are logging to %s", hostname)},
 	}
 	if command := os.Getenv("SSH_ORIGINAL_COMMAND"); command != "" {
-		params.Add("details[Command]", command)
+		typ, repo := parseGitCommand(command)
+		if typ != "" {
+			params.Add("message", fmt.Sprintf("git %s on %s", typ, hostname))
+			params.Add("details[Repository]", repo)
+		} else {
+			params.Add("message", fmt.Sprintf("You are executing command on %s", hostname))
+			params.Add("details[Command]", command)
+		}
+	} else {
+		params.Add("message", fmt.Sprintf("You are login to %s", hostname))
 	}
 
 	return params
