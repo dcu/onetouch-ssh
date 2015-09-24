@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	//"github.com/authy/onetouch-ssh"
 	"fmt"
+	"github.com/cheggaaa/pb"
 	"github.com/dcu/go-authy"
+	"github.com/mgutz/ansi"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -28,10 +30,13 @@ var (
 
 // ApprovalRequest is the approval request response.
 type ApprovalRequest struct {
-	Status string `json:"status"`
-	UUID   string `json:"uuid"`
+	Status   string `json:"status"`
+	UUID     string `json:"uuid"`
+	Notified bool   `json:"notified"`
 
-	api *authy.Authy
+	api     *authy.Authy
+	bar     *pb.ProgressBar
+	showBar bool
 }
 
 func buildParams() url.Values {
@@ -75,8 +80,9 @@ func buildParams() url.Values {
 // NewApprovalRequest creates a new approval request.
 func NewApprovalRequest(api *authy.Authy, authyID int) (*ApprovalRequest, error) {
 	params := buildParams()
+	path := fmt.Sprintf(`/onetouch/json/users/%d/approval_requests`, authyID)
 
-	response, err := api.DoRequest("POST", fmt.Sprintf(`/onetouch/json/users/%d/approval_requests`, authyID), params)
+	response, err := api.DoRequest("POST", path, params)
 	if err != nil {
 		return nil, err
 	}
@@ -99,30 +105,77 @@ func NewApprovalRequest(api *authy.Authy, authyID int) (*ApprovalRequest, error)
 
 	approvalRequest := jsonResponse.ApprovalRequest
 	approvalRequest.api = api
+	approvalRequest.showBar = isInteractiveConnection()
 	return approvalRequest, nil
 }
 
 // CheckStatus returns the status of the request.
 func (approvalRequest *ApprovalRequest) CheckStatus(timeout time.Duration) string {
+	showBar := isInteractiveConnection()
 	timeWaited := 0 * time.Second
 	interval := 2 * time.Second
 
 	status := StatusPending
+	approvalRequest.bar = pb.New(int(timeout / interval))
+	approvalRequest.setStatus(status)
+
+	if showBar {
+		approvalRequest.bar.Start()
+	}
+
 	for timeWaited < timeout {
 		status = approvalRequest.requestStatus()
+		approvalRequest.setStatus(status)
 		if status != StatusPending {
 			break
 		}
 
 		time.Sleep(interval)
 		timeWaited += interval
+
+		if showBar {
+			approvalRequest.bar.Increment()
+		}
+	}
+
+	if showBar {
+		approvalRequest.bar.FinishPrint("")
 	}
 
 	return status
 }
 
+func (approvalRequest *ApprovalRequest) setStatus(status string) {
+	if approvalRequest.showBar {
+		approvalRequest.bar.Prefix(formatForStatus(status))
+	}
+}
+
+func formatForStatus(status string) string {
+	switch status {
+	case StatusPending:
+		{
+			status = ansi.Color(status, "yellow+h")
+		}
+	case StatusApproved:
+		{
+			status = ansi.Color(status, "green+h")
+		}
+	case StatusFailed:
+		{
+			status = ansi.Color(status, "red+h")
+		}
+	case StatusDenied:
+		{
+			status = ansi.Color(status, "red+h")
+		}
+	}
+	return fmt.Sprintf("[%s] ", status)
+}
+
 func (approvalRequest *ApprovalRequest) requestStatus() string {
 	response, err := approvalRequest.api.DoRequest("GET", fmt.Sprintf("/onetouch/json/approval_requests/%s", approvalRequest.UUID), url.Values{})
+
 	if err != nil {
 		return StatusFailed
 	}
@@ -133,14 +186,14 @@ func (approvalRequest *ApprovalRequest) requestStatus() string {
 	}
 
 	jsonResponse := struct {
-		Success         bool              `json:"success"`
-		ApprovalRequest map[string]string `json:"approval_request"`
+		Success         bool             `json:"success"`
+		ApprovalRequest *ApprovalRequest `json:"approval_request"`
 	}{}
 	err = json.Unmarshal(body, &jsonResponse)
 	if err != nil {
 		return StatusFailed
 	}
 
-	status := jsonResponse.ApprovalRequest["status"]
+	status := jsonResponse.ApprovalRequest.Status
 	return status
 }

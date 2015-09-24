@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/authy/onetouch-ssh"
 	"github.com/dcu/go-authy"
+	"github.com/mgutz/ansi"
 	"net/url"
 	"os"
 	"regexp"
@@ -28,7 +29,7 @@ func NewVerification(authyID string) *Verification {
 	authyIDInt, _ := strconv.Atoi(authyID)
 	config := ssh.NewConfig()
 	api := authy.NewAuthyApi(config.AuthyAPIKey())
-	api.ApiUrl = "https://staging-2.authy.com"
+	api.ApiUrl = "https://api.authy.com"
 
 	return &Verification{
 		authyID: authyIDInt,
@@ -48,10 +49,11 @@ func (verification *Verification) sendApprovalRequest() *ApprovalRequest {
 func (verification *Verification) perform() {
 	printMessage("Sending approval request to your device... ")
 	approvalRequest := verification.sendApprovalRequest()
-	printMessage("[sent]\n")
+	printMessage(ansi.Color("[sent]\n", "green+h"))
 
 	status := approvalRequest.CheckStatus(30 * time.Second)
 	if status == StatusApproved {
+		printMessage("You've been logged in successfully.")
 		runShell()
 	} else if status == StatusPending && isInteractiveConnection() {
 		printMessage("You didn't confirm the request. ")

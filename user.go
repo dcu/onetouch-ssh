@@ -90,7 +90,7 @@ func (user *User) Register() error {
 
 	config := NewConfig()
 	api := authy.NewAuthyApi(config.AuthyAPIKey())
-	api.ApiUrl = "https://staging-2.authy.com"
+	api.ApiUrl = "https://api.authy.com"
 
 	authyUser, err := api.RegisterUser(user.Email, user.CountryCode, user.PhoneNumber, url.Values{})
 	if err != nil {

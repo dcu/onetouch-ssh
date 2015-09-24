@@ -206,6 +206,10 @@ func (contents *Contents) refresh() {
 
 func (contents *Contents) updateUser() {
 	user := contents.user
+	if user == nil {
+		return
+	}
+
 	countryCode, err := strconv.Atoi(contents.getFormLineValue("country code")[0])
 	if err != nil {
 		panic(err)
@@ -227,6 +231,7 @@ func (contents *Contents) OnUserSelected(user *ssh.User) {
 
 // OnStartEditingUser implements UsersListListener interface.
 func (contents *Contents) OnStartEditingUser(user *ssh.User) {
+	contents.user = user
 	contents.setFormInput("email")
 }
 

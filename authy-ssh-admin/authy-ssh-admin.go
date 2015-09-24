@@ -9,17 +9,14 @@ import (
 
 func editSettings() {
 	config := ssh.NewConfig()
-
-	if config.AuthyAPIKey() == "" {
-		fmt.Printf("Enter the API key: ")
-		scanner := bufio.NewScanner(os.Stdin)
-		var apiKey string
-		if scanner.Scan() {
-			apiKey = scanner.Text()
-		}
-
-		config.SetAuthyAPIKey(apiKey)
+	fmt.Printf("Enter the API key: ")
+	scanner := bufio.NewScanner(os.Stdin)
+	var apiKey string
+	if scanner.Scan() {
+		apiKey = scanner.Text()
 	}
+
+	config.SetAuthyAPIKey(apiKey)
 }
 
 func writeAuthorizedKeys() {
@@ -34,6 +31,11 @@ func dumpAuthorizedKeys() {
 }
 
 func main() {
+	config := ssh.NewConfig()
+	if config.AuthyAPIKey() == "" {
+		editSettings()
+	}
+
 	if len(os.Args) < 2 {
 		usage := `Usage: %s <command>
 

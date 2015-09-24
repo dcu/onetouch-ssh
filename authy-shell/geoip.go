@@ -23,7 +23,7 @@ func lookupMyIP() *Geoip {
 }
 
 func lookupIP(ip string) *Geoip {
-	response, err := http.Get(fmt.Sprintf("http://www.telize.com/geoip/%s", ip))
+	response, err := http.Get(fmt.Sprintf("https://www.telize.com/geoip/%s", ip))
 	if err != nil {
 		return nil
 	}
