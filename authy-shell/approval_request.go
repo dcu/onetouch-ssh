@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	//"github.com/authy/onetouch-ssh"
+	//"github.com/dcu/onetouch-ssh"
 	"fmt"
 	"github.com/cheggaaa/pb"
 	"github.com/dcu/go-authy"

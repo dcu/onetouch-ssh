@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/authy/onetouch-ssh"
+	"github.com/dcu/onetouch-ssh"
 	"os"
 )
 

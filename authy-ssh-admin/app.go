@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/authy/onetouch-ssh"
 	"github.com/dcu/go-authy"
+	"github.com/dcu/onetouch-ssh"
 	"github.com/jroimartin/gocui"
 	"log"
 	"os"

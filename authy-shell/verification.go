@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/authy/onetouch-ssh"
 	"github.com/dcu/go-authy"
+	"github.com/dcu/onetouch-ssh"
 	"github.com/mgutz/ansi"
 	"net/url"
 	"os"
