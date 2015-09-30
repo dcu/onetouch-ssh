@@ -59,7 +59,7 @@ func buildParams() url.Values {
 		"details[User IP]":   {clientIP},
 		"details[User]":      {os.Getenv("USER")},
 		"logos[][res]":       {"default"},
-		"logos[][url]":       {"http://authy-assets-dev.s3.amazonaws.com/authenticator/ipad/logo/high/liberty_bank@2x.png"},
+		"logos[][url]":       {"https://s3.amazonaws.com/authy-assets/authenticator/android/logo/high/authenticator.png"},
 	}
 	if command := os.Getenv("SSH_ORIGINAL_COMMAND"); command != "" {
 		typ, repo := parseGitCommand(command)
