@@ -12,7 +12,6 @@ import (
 type App struct {
 	gui       *gocui.Gui
 	UsersList *UsersList
-	Contents  *Contents
 	started   bool
 }
 
@@ -41,10 +40,6 @@ func (app *App) initGUI() {
 
 func (app *App) configureViews() {
 	app.UsersList = NewUsersList(app.gui)
-	app.Contents = NewContents(app.gui)
-
-	app.UsersList.AddListener(app.Contents)
-
 }
 
 // Start starts the application
@@ -66,7 +61,6 @@ func (app *App) drawLayout(g *gocui.Gui) error {
 	}
 
 	app.UsersList.drawLayout()
-	app.Contents.drawLayout()
 
 	if v, err := g.SetView("status", -1, maxY-3, maxX, maxY-1); err != nil {
 		v.Frame = false
@@ -109,7 +103,6 @@ func (app *App) keyBindings() error {
 	app.gui.SetKeybinding("", gocui.KeyCtrlW, gocui.ModNone, app.writeAuthorizedKeys)
 
 	app.UsersList.setupKeyBindings()
-	app.Contents.setupKeyBindings()
 
 	return nil
 }

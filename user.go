@@ -100,3 +100,47 @@ func (user *User) Register() error {
 	user.AuthyID = authyUser.Id
 	return nil
 }
+
+// ValueForColumn returns the value for the given column name.
+func (user *User) ValueForColumn(columnName string) string {
+	switch columnName {
+	case "ID":
+		{
+			return user.AuthyIDStr()
+		}
+	case "Username":
+		{
+			return user.Username
+		}
+	case "Email":
+		{
+			return user.Email
+		}
+	case "Phone Number":
+		{
+			return user.PhoneNumber
+		}
+	case "Configured":
+		{
+			if user.IsConfigured() {
+				return "YES"
+			}
+			return "NO"
+		}
+	case "Protected":
+		{
+			// TODO: check if there's an entry for this user in the authorized keys
+			return "NO"
+		}
+	}
+	return "<unknown>"
+}
+
+// IsConfigured returns true if the user is fully configured
+func (user *User) IsConfigured() bool {
+	if user.AuthyID > 0 && len(user.PublicKeys) > 0 {
+		return true
+	}
+	return false
+
+}

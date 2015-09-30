@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dcu/onetouch-ssh"
 	"github.com/jroimartin/gocui"
+	"strings"
 )
 
 var (
@@ -13,6 +14,8 @@ var (
 	addUserViewID      = "add-user"
 	addUserViewLabelID = "add-user-label"
 	addUserViewInputID = "add-user-input"
+
+	columns = []string{"ID", "Username", "Email", "Phone Number", "Configured", "Protected"}
 )
 
 // UsersList is a list of users.
@@ -46,17 +49,34 @@ func (list *UsersList) AddListener(listener UsersListListener) {
 }
 
 func (list *UsersList) drawLayout() {
-	_, maxY := list.gui.Size()
+	maxX, maxY := list.gui.Size()
+	columnSize := maxX / len(columns)
 
-	if v, err := list.gui.SetView(listViewID, -1, -1, 30, maxY-2); err != nil {
+	if v, err := list.gui.SetView(listViewID+"-title", 2, -1, maxX-2, 1); err != nil {
+		v.Highlight = false
+		v.Editable = false
+		v.Wrap = false
+
+		for _, columnName := range columns {
+			toFill := columnSize - len(columnName)
+			fmt.Fprintf(v, columnName+strings.Repeat(" ", toFill))
+		}
+		fmt.Fprintln(v, "")
+	}
+	if v, err := list.gui.SetView(listViewID, 2, 1, maxX-2, maxY-2); err != nil {
 		v.Highlight = true
 		v.Editable = false
 		v.Wrap = false
 
 		manager := ssh.NewUsersManager()
 		for _, user := range manager.Users() {
-			fmt.Fprintln(v, user.Username)
+			for _, columnName := range columns {
+				value := user.ValueForColumn(columnName)
+				toFill := columnSize - len(value)
+				fmt.Fprintf(v, value+strings.Repeat(" ", toFill))
+			}
 		}
+		fmt.Fprintln(v, "")
 	}
 }
 
