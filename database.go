@@ -43,7 +43,12 @@ func (config *Database) Put(key string, item DatabaseItem) error {
 	}
 	defer db.Close()
 
+	Logger.Printf("[DB] Store key: %s %#v", key, data)
 	err = db.Put([]byte(key), data, &opt.WriteOptions{Sync: true})
+
+	if err != nil {
+		panic(err)
+	}
 
 	return err
 }
@@ -56,13 +61,16 @@ func (config *Database) Get(key string, item DatabaseItem) error {
 	}
 	defer db.Close()
 
+	Logger.Printf("[DB] Retrieve key: %s\n", key)
 	data, err := db.Get([]byte(key), nil)
 	if err != nil {
+		Logger.Printf("[DB] Error retrieving key `%s`: %s", key, err)
 		return err
 	}
 
 	value, err := decodeData(data)
 	if err != nil {
+		Logger.Printf("[DB] Error decoding key `%s`: %s", key, err)
 		return err
 	}
 
@@ -80,10 +88,14 @@ func (config *Database) List() []DatabaseData {
 	}
 	defer db.Close()
 
+	Logger.Printf("Listing items in database: %s\n", config.Path)
+
 	iter := db.NewIterator(nil, nil)
 	for iter.Next() {
+		Logger.Printf("Item: %s\n", iter.Key())
 		value, err := decodeData(iter.Value())
 		if err != nil {
+			panic(err)
 		}
 		items = append(items, value)
 	}

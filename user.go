@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dcu/go-authy"
 	"net/url"
 	"strconv"
@@ -118,7 +119,7 @@ func (user *User) ValueForColumn(columnName string) string {
 		}
 	case "Phone Number":
 		{
-			return user.PhoneNumber
+			return fmt.Sprintf("+%s %s", user.CountryCodeStr(), user.PhoneNumber)
 		}
 	case "Configured":
 		{
@@ -129,7 +130,9 @@ func (user *User) ValueForColumn(columnName string) string {
 		}
 	case "Protected":
 		{
-			// TODO: check if there's an entry for this user in the authorized keys
+			if user.IsProtected() {
+				return "YES"
+			}
 			return "NO"
 		}
 	}
@@ -142,5 +145,10 @@ func (user *User) IsConfigured() bool {
 		return true
 	}
 	return false
+}
 
+// IsProtected returns true if the user is fully configured
+func (user *User) IsProtected() bool {
+	manager := NewAuthorizedKeysManager()
+	return manager.Contains(fmt.Sprintf("authy-shell %d", user.AuthyID))
 }

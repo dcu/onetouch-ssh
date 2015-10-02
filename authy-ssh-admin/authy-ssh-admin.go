@@ -20,13 +20,13 @@ func editSettings() {
 }
 
 func writeAuthorizedKeys() {
-	writer := ssh.NewAuthorizedKeysWriter()
+	writer := ssh.NewAuthorizedKeysManager()
 	writer.WriteToDefaultLocation()
 	fmt.Println("Public keys were wrote to: ~/.ssh/authorized_keys")
 }
 
 func dumpAuthorizedKeys() {
-	writer := ssh.NewAuthorizedKeysWriter()
+	writer := ssh.NewAuthorizedKeysManager()
 	writer.Dump()
 }
 

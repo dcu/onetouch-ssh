@@ -1,11 +1,8 @@
 package main
 
 import (
-	"github.com/dcu/go-authy"
 	"github.com/dcu/onetouch-ssh"
 	"github.com/jroimartin/gocui"
-	"log"
-	"os"
 )
 
 // App is the application.
@@ -68,7 +65,7 @@ func (app *App) drawLayout(g *gocui.Gui) error {
 		v.FgColor = gocui.ColorBlack
 	}
 
-	if v, err := g.SetView("help-line", maxX/2, maxY-3, maxX, maxY-1); err != nil {
+	if v, err := g.SetView("help-line", 50, maxY-3, maxX, maxY-1); err != nil {
 		v.Frame = false
 		v.BgColor = gocui.ColorGreen
 		v.FgColor = gocui.ColorBlack
@@ -108,19 +105,11 @@ func (app *App) keyBindings() error {
 }
 
 func (app *App) writeAuthorizedKeys(g *gocui.Gui, v *gocui.View) error {
-	writer := ssh.NewAuthorizedKeysWriter()
+	writer := ssh.NewAuthorizedKeysManager()
 	writer.WriteToDefaultLocation()
 	return nil
 }
 
 // OnUserAdded reports when a user was added.
 func (app *App) OnUserAdded(user *ssh.User) {
-}
-
-func init() {
-	null, err := os.Open(os.DevNull)
-	if err != nil {
-		panic(err)
-	}
-	authy.Logger = log.New(null, "", 0)
 }

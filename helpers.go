@@ -6,6 +6,7 @@ import (
 	"regexp"
 )
 
+// findUserHome returns the home directory of the current user.
 func findUserHome() string {
 	var homeDir string
 

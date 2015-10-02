@@ -91,7 +91,7 @@ func (manager *UsersManager) LoadUser(username string) *User {
 	user := &User{}
 	err := manager.config.Get(username, user)
 	if err != nil {
-		//panic(err)
+		panic(err)
 	}
 
 	return user
