@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ var (
 	gitCmdRx = regexp.MustCompile(`^(git-receive-pack|git-upload-pack) '(.*)'$`)
 )
 
-func runShell() {
+func RunShell() {
 	shell := os.Getenv("SHELL")
 
 	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
@@ -64,42 +64,11 @@ func detachCommand(command ...string) {
 	waitPid(pid)
 }
 
-func runCommand(command ...string) string {
+func RunCommand(command ...string) string {
 	output, err := exec.Command(command[0], command[1:]...).Output()
 	if err != nil {
 		return err.Error()
 	}
 
 	return string(output)
-}
-
-func isInteractiveConnection() bool {
-	term := os.Getenv("TERM")
-
-	if term != "" && term != "dumb" {
-		return true
-	}
-
-	return false
-}
-
-func printMessage(message string, args ...interface{}) {
-	if isInteractiveConnection() {
-		fmt.Printf(message, args...)
-	}
-}
-
-func parseGitCommand(command string) (typ string, repo string) {
-	result := gitCmdRx.FindStringSubmatch(command)
-
-	if len(result) == 3 {
-		if result[1] == "git-receive-pack" {
-			typ = "push"
-		} else {
-			typ = "fetch"
-		}
-		return typ, result[2]
-	}
-
-	return "", ""
 }

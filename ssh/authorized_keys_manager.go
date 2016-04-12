@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/dcu/onetouch-ssh/utils"
 )
 
 // AuthorizedKeysManager allows to write the authorized_keys file.
@@ -22,7 +24,7 @@ func NewAuthorizedKeysManager() *AuthorizedKeysManager {
 
 // WriteToDefaultLocation writes the authorized keys to ~/.ssh/authorized_keys
 func (manager *AuthorizedKeysManager) WriteToDefaultLocation() {
-	home := findUserHome()
+	home := utils.FindUserHome()
 	// FIXME: create the .ssh dir if it doesn't exist.
 
 	file, err := os.Create(home + "/.ssh/authorized_keys")
@@ -65,7 +67,7 @@ func (manager *AuthorizedKeysManager) Write(f io.Writer) {
 
 // Contains returns true if the given text is present in the authorized keys file.
 func (manager *AuthorizedKeysManager) Contains(text string) bool {
-	home := findUserHome()
+	home := utils.FindUserHome()
 	file, err := os.Open(home + "/.ssh/authorized_keys")
 	if err != nil {
 		panic(err)

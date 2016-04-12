@@ -21,29 +21,47 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
+	"github.com/dcu/onetouch-ssh/ssh"
+	"github.com/dcu/onetouch-ssh/utils"
 	"github.com/spf13/cobra"
 )
 
-// This represents the base command when called without any subcommands
-var RootCmd = &cobra.Command{
-	Use:   "onetouch-ssh",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+// shellCmd represents the shell command
+var shellCmd = &cobra.Command{
+	Use:   "shell <authy id>",
+	Short: "Runs a shell if approved with OneTouch",
+	Long:  `When invoked this command sends a OneTouch request to the user.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			if utils.IsInteractiveConnection() {
+				cmd.Help()
+			}
+			os.Exit(1)
+		}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+		authyID := args[0]
+
+		verification := ssh.NewVerification(authyID)
+		err := verification.Run()
+		if err != nil {
+			os.Exit(1)
+		}
+	},
 }
 
-// Execute adds all child commands to the root command sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
-	}
+func init() {
+	RootCmd.AddCommand(shellCmd)
+
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// shellCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// shellCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }

@@ -2,6 +2,8 @@ package ssh
 
 import (
 	"errors"
+
+	"github.com/dcu/onetouch-ssh/utils"
 )
 
 var ()
@@ -98,7 +100,7 @@ func (manager *UsersManager) LoadUser(username string) *User {
 }
 
 func usersDbPath() string {
-	return findUserHome() + "/.authy-onetouch/users/"
+	return utils.FindUserHome() + "/.authy-onetouch/users/"
 }
 
 func (manager *UsersManager) onUserAdded(user *User) {

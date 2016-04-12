@@ -1,5 +1,9 @@
 package ssh
 
+import (
+	"github.com/dcu/onetouch-ssh/utils"
+)
+
 // Config contains the configuration of the app.
 type Config struct {
 	db          *Database
@@ -58,5 +62,5 @@ func (config *Config) sync() {
 }
 
 func configDbPath() string {
-	return findUserHome() + "/.authy-onetouch/config/"
+	return utils.FindUserHome() + "/.authy-onetouch/config/"
 }
