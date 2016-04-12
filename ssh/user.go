@@ -89,8 +89,12 @@ func (user *User) Register() error {
 		return errors.New("Invalid phone number.")
 	}
 
-	config := NewConfig()
-	api := authy.NewAuthyAPI(config.AuthyAPIKey())
+	config, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+
+	api := authy.NewAuthyAPI(config.APIKey)
 	api.BaseURL = "https://api.authy.com"
 
 	authyUser, err := api.RegisterUser(user.Email, user.CountryCode, user.PhoneNumber, url.Values{})

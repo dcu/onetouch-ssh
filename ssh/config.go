@@ -1,66 +1,59 @@
 package ssh
 
 import (
+	"io/ioutil"
+	"os"
+
 	"github.com/dcu/onetouch-ssh/utils"
+	"gopkg.in/yaml.v2"
+)
+
+var (
+	DataPath = utils.FindUserHome() + "/.authy-onetouch"
 )
 
 // Config contains the configuration of the app.
 type Config struct {
-	db          *Database
-	authyConfig *AuthyConfig
+	APIKey string `yaml:"api_key"`
 }
 
-// AuthyConfig is the config related to Authy
-type AuthyConfig struct {
-	APIKey string
-}
-
-// ToMap implements the DatabaseData interface
-func (authy *AuthyConfig) ToMap() DatabaseData {
-	return DatabaseData{
-		"APIKey": authy.APIKey,
-	}
-}
-
-// FromMap implements the DatabaseData interface
-func (authy *AuthyConfig) FromMap(data DatabaseData) {
-	if value := data["APIKey"]; value != nil {
-		authy.APIKey = value.(string)
-	}
-}
-
-var configInstance *Config
-
-// NewConfig returns a singleton instance of the config.
-func NewConfig() *Config {
-	if configInstance == nil {
-		configInstance = &Config{
-			db:          NewDatabase(configDbPath()),
-			authyConfig: &AuthyConfig{},
-		}
-
-		configInstance.db.Get("authy", configInstance.authyConfig)
+func NewConfig(apiKey string) *Config {
+	config := &Config{
+		APIKey: apiKey,
 	}
 
-	return configInstance
+	return config
 }
 
-// AuthyAPIKey returns the authy's api key.
-func (config *Config) AuthyAPIKey() string {
-	return config.authyConfig.APIKey
+func LoadConfig() (*Config, error) {
+	data, err := ioutil.ReadFile(configDbFile())
+	if err != nil {
+		return nil, err
+	}
+
+	config := &Config{}
+	err = yaml.Unmarshal(data, config)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
 }
 
-// SetAuthyAPIKey sets the authy's api key.
-func (config *Config) SetAuthyAPIKey(apiKey string) {
-	config.authyConfig.APIKey = apiKey
+func (config *Config) Save() error {
+	data, err := yaml.Marshal(config)
+	if err != nil {
+		return err
+	}
 
-	config.sync()
+	return ioutil.WriteFile(configDbFile(), data, 0600)
 }
 
-func (config *Config) sync() {
-	config.db.Put("authy", config.authyConfig)
+func configDbFile() string {
+	return DataPath + "/config.yml"
 }
 
-func configDbPath() string {
-	return utils.FindUserHome() + "/.authy-onetouch/config/"
+func init() {
+	os.MkdirAll(DataPath, 0700)
 }

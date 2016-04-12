@@ -5,8 +5,12 @@ import (
 )
 
 func LoadAuthyAPI() *authy.Authy {
-	config := NewConfig()
-	api := authy.NewAuthyAPI(config.AuthyAPIKey())
+	config, err := LoadConfig()
+	if err != nil {
+		return nil
+	}
+
+	api := authy.NewAuthyAPI(config.APIKey)
 	api.BaseURL = "https://api.authy.com"
 
 	return api
