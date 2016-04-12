@@ -3,14 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/dcu/go-authy"
-	"github.com/dcu/onetouch-ssh"
-	"github.com/mgutz/ansi"
 	"net/url"
 	"os"
 	"regexp"
-	"strconv"
 	"time"
+
+	"github.com/dcu/go-authy"
+	"github.com/dcu/onetouch-ssh"
+	"github.com/mgutz/ansi"
 )
 
 var (
@@ -19,20 +19,19 @@ var (
 
 // Verification allows to verify a TOTP code.
 type Verification struct {
-	authyID         int
+	authyID         string
 	api             *authy.Authy
 	approvalRequest *ApprovalRequest
 }
 
 // NewVerification builds a new TOTP verification.
 func NewVerification(authyID string) *Verification {
-	authyIDInt, _ := strconv.Atoi(authyID)
 	config := ssh.NewConfig()
-	api := authy.NewAuthyApi(config.AuthyAPIKey())
-	api.ApiUrl = "https://api.authy.com"
+	api := authy.NewAuthyAPI(config.AuthyAPIKey())
+	api.BaseURL = "https://api.authy.com"
 
 	return &Verification{
-		authyID: authyIDInt,
+		authyID: authyID,
 		api:     api,
 	}
 }
@@ -66,7 +65,7 @@ func (verification *Verification) perform() {
 }
 
 func (verification *Verification) askTOTPCode() string {
-	verification.api.RequestSms(verification.authyID, url.Values{})
+	verification.api.RequestSMS(verification.authyID, url.Values{})
 
 	var code string
 	for i := 0; i < 3; i++ {

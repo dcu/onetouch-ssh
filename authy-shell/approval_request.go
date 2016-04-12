@@ -78,7 +78,7 @@ func buildParams() url.Values {
 }
 
 // NewApprovalRequest creates a new approval request.
-func NewApprovalRequest(api *authy.Authy, authyID int) (*ApprovalRequest, error) {
+func NewApprovalRequest(api *authy.Authy, authyID string) (*ApprovalRequest, error) {
 	params := buildParams()
 	path := fmt.Sprintf(`/onetouch/json/users/%d/approval_requests`, authyID)
 

@@ -15,7 +15,7 @@ type User struct {
 	Email       string
 	CountryCode int
 	PhoneNumber string
-	AuthyID     int
+	AuthyID     string
 }
 
 // NewUser returns a new instance of User
@@ -42,11 +42,11 @@ func (user *User) CountryCodeStr() string {
 
 // AuthyIDStr returns the authy id as a string.
 func (user *User) AuthyIDStr() string {
-	if user.AuthyID == 0 {
+	if user.AuthyID == "" {
 		return "<not set>"
 	}
 
-	return strconv.Itoa(user.AuthyID)
+	return user.AuthyID
 }
 
 // ToMap converts the user to a map
@@ -67,7 +67,7 @@ func (user *User) FromMap(data DatabaseData) {
 		user.Username = value.(string)
 	}
 	if value := data["AuthyID"]; value != nil {
-		user.AuthyID = value.(int)
+		user.AuthyID = value.(string)
 	}
 	if value := data["Email"]; value != nil {
 		user.Email = value.(string)
@@ -90,15 +90,15 @@ func (user *User) Register() error {
 	}
 
 	config := NewConfig()
-	api := authy.NewAuthyApi(config.AuthyAPIKey())
-	api.ApiUrl = "https://api.authy.com"
+	api := authy.NewAuthyAPI(config.AuthyAPIKey())
+	api.BaseURL = "https://api.authy.com"
 
 	authyUser, err := api.RegisterUser(user.Email, user.CountryCode, user.PhoneNumber, url.Values{})
 	if err != nil {
 		return err
 	}
 
-	user.AuthyID = authyUser.Id
+	user.AuthyID = authyUser.ID
 	return nil
 }
 
@@ -141,7 +141,7 @@ func (user *User) ValueForColumn(columnName string) string {
 
 // IsConfigured returns true if the user is fully configured
 func (user *User) IsConfigured() bool {
-	if user.AuthyID > 0 && len(user.PublicKeys) > 0 {
+	if user.AuthyID != "" && len(user.PublicKeys) > 0 {
 		return true
 	}
 	return false
