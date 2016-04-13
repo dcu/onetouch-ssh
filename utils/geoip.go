@@ -1,10 +1,19 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
-	"github.com/Jeffail/gabs"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/Jeffail/gabs"
+)
+
+var (
+	// GeoIPUnknown is returned when the city or country name can't be resolved.
+	GeoIPUnknown = "<unknown>"
+
+	errInvalidGeoip = errors.New("invalid geoip data")
 )
 
 // GeoIP contains information about the geolocalization.
@@ -12,6 +21,7 @@ type GeoIP struct {
 	data *gabs.Container
 }
 
+// NewGeoIP returns a new instance of the Geoip struct
 func NewGeoIP(ip string) (*GeoIP, error) {
 	var data *gabs.Container
 	var err error
@@ -26,6 +36,10 @@ func NewGeoIP(ip string) (*GeoIP, error) {
 		return nil, err
 	}
 
+	if data == nil {
+		return nil, errInvalidGeoip
+	}
+
 	geoip := &GeoIP{
 		data: data,
 	}
@@ -33,19 +47,29 @@ func NewGeoIP(ip string) (*GeoIP, error) {
 	return geoip, nil
 }
 
+// City returns the name of the city
 func (geoip *GeoIP) City() string {
+	if geoip.data == nil {
+		return GeoIPUnknown
+	}
+
 	city, ok := geoip.data.Search("city").Data().(string)
 	if !ok {
-		return "<unknown>"
+		return GeoIPUnknown
 	}
 
 	return city
 }
 
+// Country returns the name of the country
 func (geoip *GeoIP) Country() string {
+	if geoip.data == nil {
+		return GeoIPUnknown
+	}
+
 	country, ok := geoip.data.Search("country", "name").Data().(string)
 	if !ok {
-		return "<unknown>"
+		return GeoIPUnknown
 	}
 
 	return country
@@ -68,14 +92,15 @@ func lookupIP(ip string) (*gabs.Container, error) {
 	return parseGeoIPResponse(response)
 }
 
+// FormatIPAndLocation returns the ip with geo location for the given ip.
 func FormatIPAndLocation(ip string) string {
 	geoip, err := NewGeoIP(ip)
 
 	if err != nil {
-		return fmt.Sprintf("%s (%s, %s)", ip, geoip.City(), geoip.Country())
+		return ip
 	}
 
-	return ip
+	return fmt.Sprintf("%s (%s, %s)", ip, geoip.City(), geoip.Country())
 }
 
 func parseGeoIPResponse(response *http.Response) (*gabs.Container, error) {

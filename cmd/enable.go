@@ -31,13 +31,8 @@ import (
 // enableCmd represents the enable command
 var enableCmd = &cobra.Command{
 	Use:   "enable",
-	Short: "Writes the list of users and pubkeys into the authorized_keys file.",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Enables all users to use onetouch when using SSH connections",
+	Long:  `The enable command adds all the users to "~/.ssh/authorized_keys" which is used to validate the SSH connection.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		manager := ssh.NewAuthorizedKeysManager()
 		err := manager.WriteToDefaultLocation()

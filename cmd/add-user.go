@@ -38,6 +38,9 @@ var addUserCmd = &cobra.Command{
 
 Example:
     onetouch-ssh add-user user@example.org 1 5555555555 "ssh-rsa ... user@example-host"
+
+Note: Newly added users will not be enabled automatically -- they will be enabled upon
+      running 'onetouch-ssh enable'.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 4 {

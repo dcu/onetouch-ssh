@@ -27,12 +27,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// This represents the base command when called without any subcommands
+// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "onetouch-ssh",
-	Short: "Authy OneTouch for SSH.",
-	Long: `onetouch-ssh is a wrapper that works with SSH's pre-key
-authorized key command feature to provide 2FA for a typical Unix SSH session.
+	Short: "Onetouch SSH is a command to add 2FA to SSH connections",
+	Long: `Onetouch SSH adds secure password-less experience to your SSH using OneTouch
+It also supports TOTP-based verifications using SMS and Voice.
 `,
 }
 
