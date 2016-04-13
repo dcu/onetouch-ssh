@@ -52,7 +52,7 @@ func (geoip *GeoIP) Country() string {
 }
 
 func lookupMyIP() (*gabs.Container, error) {
-	response, err := http.Get("http://www.telize.com/geoip")
+	response, err := http.Get("https://geoip.nekudo.com/api")
 	if err != nil {
 		return nil, err
 	}

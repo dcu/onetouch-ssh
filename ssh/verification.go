@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	ApprovalTimeout        = 4 * time.Second
+	ApprovalTimeout        = 45 * time.Second
 	cleanCodeRegexp        = regexp.MustCompile(`[^\d+]`)
 	MaxAttemptsToReadCode  = 3
 	ErrInvalidVerification = errors.New("invalid verification")

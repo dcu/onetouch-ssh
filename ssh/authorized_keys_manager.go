@@ -23,17 +23,17 @@ func NewAuthorizedKeysManager() *AuthorizedKeysManager {
 }
 
 // WriteToDefaultLocation writes the authorized keys to ~/.ssh/authorized_keys
-func (manager *AuthorizedKeysManager) WriteToDefaultLocation() {
+func (manager *AuthorizedKeysManager) WriteToDefaultLocation() error {
 	home := utils.FindUserHome()
 	// FIXME: create the .ssh dir if it doesn't exist.
 
 	file, err := os.Create(home + "/.ssh/authorized_keys")
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer file.Close()
 
-	manager.Write(file)
+	return manager.Write(file)
 }
 
 func (manager *AuthorizedKeysManager) Write(f io.Writer) error {
