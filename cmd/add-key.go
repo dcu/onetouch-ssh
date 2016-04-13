@@ -21,38 +21,39 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/dcu/onetouch-ssh/ssh"
 	"github.com/spf13/cobra"
 )
 
-// initCmd represents the init command
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Sets up configurations for onetouch-ssh.",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+// add-userCmd represents the add-user command
+var addKeyCmd = &cobra.Command{
+	Use:   "add-key <email> <public ssh key>",
+	Short: "Adds a public key to a user.",
+	Long: `Links an additional public key to an Authy user id.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Enter Authy API key: ")
-
-		var apiKey string
-		scanner := bufio.NewScanner(os.Stdin)
-		if scanner.Scan() {
-			apiKey = scanner.Text()
+Example:
+    onetouch-ssh add-key 12345678 "ssh-rsa ... user@example-host"
+`,
+    Run: func(cmd *cobra.Command, args []string) {
+		if len(args) < 2 {
+			cmd.Help()
+			os.Exit(1)
 		}
 
-		config := ssh.NewConfig(apiKey)
-		config.Save()
+		usersManager := ssh.NewUsersManager()
+		publicKey := strings.Join(args[1:], " ")
+        err := usersManager.AddKey(args[0], publicKey)
+		if err != nil {
+			fmt.Printf("Error adding key to user: %s", err)
+			os.Exit(1)
+		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(initCmd)
+	RootCmd.AddCommand(addKeyCmd)
 }

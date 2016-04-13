@@ -34,13 +34,12 @@ import (
 var addUserCmd = &cobra.Command{
 	Use:   "add-user <email> <country code> <phone number> <public ssh key>",
 	Short: "Add user to be authenticated with 2FA for the current unix account",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Long: `Links the current user account with an Authy ID and SSH public key.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
+Example:
+    onetouch-ssh add-user user@example.org 1 5555555555 "ssh-rsa ... user@example-host"
+`,
+    Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 4 {
 			cmd.Help()
 			os.Exit(1)

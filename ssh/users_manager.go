@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrUserAlreadyPresent = errors.New("user is already present")
+    ErrUserDoesNotExist = errors.New("user does not exist")
 )
 
 type EachUserHandler func(authyID string, publicKey string)
@@ -84,6 +85,22 @@ func (manager *UsersManager) AddUserID(authyID string, publicKey string) error {
 
 	_, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
 	return err
+}
+
+func (manager *UsersManager) AddKey(authyID string, publicKey string) error {
+    if manager.HasUser(authyID) != true {
+        return ErrUserDoesNotExist
+    }
+
+    file, err := os.OpenFile(usersDbPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+    if err != nil {
+        return err
+    }
+
+    defer file.Close()
+
+    _, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
+    return err
 }
 
 func usersDbPath() string {

@@ -26,6 +26,30 @@ func NewUser(username string) *User {
 	return user
 }
 
+// LoadUser loads user data from the Authy API
+func (user *User) LoadUser(authyId string) error {
+	if len(authyId) == 0 {
+		return errors.New("Invalid Authy ID.")
+	}
+
+	config, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+
+	api := authy.NewAuthyAPI(config.APIKey)
+	api.BaseURL = "https://api.authy.com"
+
+    // Change this!!!
+	authyUser, err := api.RegisterUser(user.Email, user.CountryCode, user.PhoneNumber, url.Values{})
+	if err != nil {
+		return err
+	}
+
+	user.AuthyID = authyUser.ID
+	return nil
+}
+
 // Save saves the user
 func Save() bool {
 	return false

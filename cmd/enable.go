@@ -31,7 +31,7 @@ import (
 // enableCmd represents the enable command
 var enableCmd = &cobra.Command{
 	Use:   "enable",
-	Short: "A brief description of your command",
+	Short: "Writes the list of users and pubkeys into the authorized_keys file.",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
