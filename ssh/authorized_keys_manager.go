@@ -36,33 +36,31 @@ func (manager *AuthorizedKeysManager) WriteToDefaultLocation() {
 	manager.Write(file)
 }
 
-func (manager *AuthorizedKeysManager) Write(f io.Writer) {
+func (manager *AuthorizedKeysManager) Write(f io.Writer) error {
 	w := bufio.NewWriter(f)
 	usersManager := NewUsersManager()
 
-	authyShell, err := exec.LookPath("authy-shell")
+	authyShell, err := exec.LookPath("onetouch-ssh")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// FIXME: keep the old contents.
 	w.WriteString("### onetouch-ssh\n")
-	for _, user := range usersManager.Users() {
-		if len(user.PublicKeys) == 0 {
-			continue
+	usersManager.EachUser(func(authyID string, publicKey string) {
+		if len(publicKey) == 0 {
+			return
 		}
 
-		w.WriteString("# " + user.Username + "\n")
-		for _, pk := range user.PublicKeys {
-			if pk != "" {
-				pk = strings.Trim(pk, " ")
-				cmd := fmt.Sprintf("%s %d", authyShell, user.AuthyID)
-				w.WriteString(`command="` + cmd + `" ` + pk + "\n")
-			}
-		}
-	}
+		w.WriteString("# " + authyID + "\n")
+		publicKey = strings.Trim(publicKey, " ")
+		cmd := fmt.Sprintf("%s %s %s", authyShell, "shell", authyID)
+		w.WriteString(`command="` + cmd + `" ` + publicKey + "\n")
+	})
+
 	w.WriteString("###\n")
 	w.Flush()
+	return nil
 }
 
 // Contains returns true if the given text is present in the authorized keys file.

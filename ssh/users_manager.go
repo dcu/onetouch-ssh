@@ -1,110 +1,91 @@
 package ssh
 
 import (
+	//"github.com/dcu/onetouch-ssh/utils"
+	"bufio"
 	"errors"
-
-	"github.com/dcu/onetouch-ssh/utils"
+	"fmt"
+	"net/url"
+	"os"
+	"strings"
 )
 
-var ()
+var (
+	ErrUserAlreadyPresent = errors.New("user is already present")
+)
 
-// UsersManagerListener is a interface to listen to user's events.
-type UsersManagerListener interface {
-	OnUserAdded(user *User)
-}
+type EachUserHandler func(authyID string, publicKey string)
 
 // UsersManager is in charge of adding/deleting/updating/listing users
 type UsersManager struct {
-	listeners []UsersManagerListener
-	config    *Database
 }
-
-var usersManagerInstance *UsersManager
 
 // NewUsersManager returns the current users manager instance
 func NewUsersManager() *UsersManager {
-	if usersManagerInstance == nil {
-		usersManagerInstance = &UsersManager{
-			config: NewDatabase(usersDbPath()),
-		}
-	}
-
-	return usersManagerInstance
+	return &UsersManager{}
 }
 
-// AddListener adds a new listener
-func (manager *UsersManager) AddListener(listener UsersManagerListener) {
-	manager.listeners = append(manager.listeners, listener)
-}
-
-// UpdateUser updates the given user
-func (manager *UsersManager) UpdateUser(user *User) error {
-	if len(user.Username) == 0 {
-		return errors.New("Username can't be empty.")
-	}
-
-	err := manager.config.Put(user.Username, user)
-	if err == nil {
-		return nil
-	}
-
-	return err
-
-}
-
-// AddUser adds a new user
-func (manager *UsersManager) AddUser(user *User) error {
-	if len(user.Username) == 0 {
-		return errors.New("Username can't be empty.")
-	}
-
-	err := manager.config.Put(user.Username, user)
-	if err == nil {
-		manager.onUserAdded(user)
-		return nil
-	}
-
-	return err
-}
-
-// HasUsers returns true if the manager has users.
-func (manager *UsersManager) HasUsers() bool {
-	return manager.config.HasKeys()
-}
-
-// Users returns the list of users
-func (manager *UsersManager) Users() []*User {
-	users := []*User{}
-	for _, data := range manager.config.List() {
-		user := &User{}
-		user.FromMap(data)
-		users = append(users, user)
-	}
-
-	return users
-}
-
-// LoadUser loads a user using the given username
-func (manager *UsersManager) LoadUser(username string) *User {
-	if username == "" {
-		return nil
-	}
-
-	user := &User{}
-	err := manager.config.Get(username, user)
+func (manager *UsersManager) EachUser(fn EachUserHandler) error {
+	file, err := os.Open(usersDbPath())
 	if err != nil {
-		panic(err)
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		userData := strings.SplitN(scanner.Text(), " ", 2)
+		fn(userData[0], userData[1])
 	}
 
-	return user
+	return nil
+}
+
+func (manager *UsersManager) HasUser(userID string) bool {
+	found := false
+	manager.EachUser(func(authyID string, publicKey string) {
+		if authyID == userID {
+			found = true
+			return
+		}
+	})
+
+	return found
+}
+
+func (manager *UsersManager) AddUser(email string, countryCode int, phoneNumber string, publicKey string) error {
+	api, err := LoadAuthyAPI()
+	if err != nil {
+		return err
+	}
+	publicKey = strings.Replace(publicKey, "\n", "", -1)
+
+	user, err := api.RegisterUser(email, countryCode, phoneNumber, url.Values{})
+	if err != nil {
+		for field, msg := range user.Errors {
+			fmt.Printf("%s=%s\n", field, msg)
+		}
+		return err
+	}
+
+	return manager.AddUserID(user.ID, publicKey)
+}
+
+func (manager *UsersManager) AddUserID(authyID string, publicKey string) error {
+	if manager.HasUser(authyID) {
+		return ErrUserAlreadyPresent
+	}
+
+	file, err := os.OpenFile(usersDbPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
+	return err
 }
 
 func usersDbPath() string {
-	return utils.FindUserHome() + "/.authy-onetouch/users/"
-}
-
-func (manager *UsersManager) onUserAdded(user *User) {
-	for _, listener := range manager.listeners {
-		listener.OnUserAdded(user)
-	}
+	return DataPath + "/users.list"
 }

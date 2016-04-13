@@ -4,14 +4,14 @@ import (
 	"github.com/dcu/go-authy"
 )
 
-func LoadAuthyAPI() *authy.Authy {
+func LoadAuthyAPI() (*authy.Authy, error) {
 	config, err := LoadConfig()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	api := authy.NewAuthyAPI(config.APIKey)
 	api.BaseURL = "https://api.authy.com"
 
-	return api
+	return api, nil
 }

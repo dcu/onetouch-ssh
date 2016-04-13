@@ -29,9 +29,14 @@ type Verification struct {
 }
 
 func NewVerification(authyID string) *Verification {
+	api, err := LoadAuthyAPI()
+	if err != nil {
+		return nil
+	}
+
 	return &Verification{
 		authyID: authyID,
-		api:     LoadAuthyAPI(),
+		api:     api,
 	}
 }
 
