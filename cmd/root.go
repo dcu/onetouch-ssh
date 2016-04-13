@@ -27,16 +27,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// This represents the base command when called without any subcommands
+// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "onetouch-ssh",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Onetouch SSH is a command to add 2FA to SSH connections",
+	Long: `Onetouch SSH adds secure password-less experience to your SSH using OneTouch
+It also supports TOTP-based verifications using SMS and Voice.
+`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.

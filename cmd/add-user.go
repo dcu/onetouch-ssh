@@ -33,13 +33,9 @@ import (
 // add-userCmd represents the add-user command
 var addUserCmd = &cobra.Command{
 	Use:   "add-user <email> <country code> <phone number> <public ssh key>",
-	Short: "Add user to be authenticated with 2FA for the current unix account",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Adds a user to be authenticated with 2FA for the current unix account",
+	Long: `The added user will not be enabled by default.
+To enable it you have to call the "enable" command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 4 {
 			cmd.Help()
