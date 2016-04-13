@@ -7,11 +7,17 @@ import (
 	"net/http"
 )
 
+var (
+	// Unknown is returned when the city or country name can't be resolved.
+	Unknown = "<unknown>"
+)
+
 // GeoIP contains information about the geolocalization.
 type GeoIP struct {
 	data *gabs.Container
 }
 
+// NewGeoIP returns a new instance of the Geoip struct
 func NewGeoIP(ip string) (*GeoIP, error) {
 	var data *gabs.Container
 	var err error
@@ -33,19 +39,29 @@ func NewGeoIP(ip string) (*GeoIP, error) {
 	return geoip, nil
 }
 
+// City returns the name of the city
 func (geoip *GeoIP) City() string {
+	if geoip.data == nil {
+		return Unknown
+	}
+
 	city, ok := geoip.data.Search("city").Data().(string)
 	if !ok {
-		return "<unknown>"
+		return Unknown
 	}
 
 	return city
 }
 
+// Country returns the name of the country
 func (geoip *GeoIP) Country() string {
+	if geoip.data == nil {
+		return Unknown
+	}
+
 	country, ok := geoip.data.Search("country", "name").Data().(string)
 	if !ok {
-		return "<unknown>"
+		return Unknown
 	}
 
 	return country
@@ -68,6 +84,7 @@ func lookupIP(ip string) (*gabs.Container, error) {
 	return parseGeoIPResponse(response)
 }
 
+// FormatIPAndLocation returns the ip with geo location for the given ip.
 func FormatIPAndLocation(ip string) string {
 	geoip, err := NewGeoIP(ip)
 
