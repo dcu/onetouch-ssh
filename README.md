@@ -8,27 +8,22 @@
 
 Type the following command and follow the instructions:
 
-    authy-ssh-admin edit-settings
+    onetouch-ssh init
 
 ## Add Users
 
 Type the following command:
 
-    authy-ssh-admin edit-users
+    onetouch-ssh add-user <email> <country code> <phone number> <public key>
 
 Next you can start adding the users using the form.
 Type `Ctrl-c` to finish.
 
-## Write `authorized_keys` file
+## Enable
 
-To see how's the `authorized_keys` file going to look type the following
-command:
+To enable OneTouch for SSH just type:
 
-    authy-ssh-admin dump-authorized-keys
-
-To actually write the file type:
-
-    authy-ssh-admin write-authorized-keys
+    onetouch-ssh enable
 
 And that's it, you can try to ssh to the server.
 
@@ -39,14 +34,12 @@ notification with a limited period of time to approve:
 
     $ ssh ssh.server.com
     Sending approval request to your device... [sent]
-    [pending] 7 / 15 [========================================================>----------------------------------------------------------------] 46.67 % 16s
 
 If the user doesn't approve the request before the time expires a
 security code is asked as a fallback.
 
     $ ssh ssh.server.com
     Sending approval request to your device... [sent]
-    [pending] 15 / 15 [=======================================================================================================================] 100.00 % 31s
     You didn't confirm the request. A text-message was sent to your phone.
     Enter security code:
 
