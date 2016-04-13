@@ -1,15 +1,19 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
-	"github.com/Jeffail/gabs"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/Jeffail/gabs"
 )
 
 var (
 	// Unknown is returned when the city or country name can't be resolved.
 	Unknown = "<unknown>"
+
+	errInvalidGeoip = errors.New("invalid geoip data")
 )
 
 // GeoIP contains information about the geolocalization.
@@ -30,6 +34,10 @@ func NewGeoIP(ip string) (*GeoIP, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if data == nil {
+		return nil, errInvalidGeoip
 	}
 
 	geoip := &GeoIP{
