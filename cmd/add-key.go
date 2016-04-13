@@ -31,14 +31,14 @@ import (
 
 // add-userCmd represents the add-user command
 var addKeyCmd = &cobra.Command{
-	Use:   "add-key <email> <public ssh key>",
+	Use:   "add-key <authy id> <ssh public key>",
 	Short: "Adds a public key to a user.",
 	Long: `Links an additional public key to an Authy user id.
 
 Example:
     onetouch-ssh add-key 12345678 "ssh-rsa ... user@example-host"
 `,
-    Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
 			cmd.Help()
 			os.Exit(1)
@@ -46,7 +46,7 @@ Example:
 
 		usersManager := ssh.NewUsersManager()
 		publicKey := strings.Join(args[1:], " ")
-        err := usersManager.AddKey(args[0], publicKey)
+		err := usersManager.AddKey(args[0], publicKey)
 		if err != nil {
 			fmt.Printf("Error adding key to user: %s", err)
 			os.Exit(1)

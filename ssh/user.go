@@ -40,13 +40,15 @@ func (user *User) LoadUser(authyId string) error {
 	api := authy.NewAuthyAPI(config.APIKey)
 	api.BaseURL = "https://api.authy.com"
 
-    // Change this!!!
-	authyUser, err := api.RegisterUser(user.Email, user.CountryCode, user.PhoneNumber, url.Values{})
+	authyUser, err := api.UserStatus(authyId, url.Values{})
 	if err != nil {
 		return err
 	}
 
 	user.AuthyID = authyUser.ID
+	user.CountryCode = authyUser.StatusData.Country
+	user.PhoneNumber = authyUser.StatusData.PhoneNumber
+
 	return nil
 }
 

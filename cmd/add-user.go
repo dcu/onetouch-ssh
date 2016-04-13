@@ -39,7 +39,7 @@ var addUserCmd = &cobra.Command{
 Example:
     onetouch-ssh add-user user@example.org 1 5555555555 "ssh-rsa ... user@example-host"
 `,
-    Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 4 {
 			cmd.Help()
 			os.Exit(1)

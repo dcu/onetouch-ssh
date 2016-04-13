@@ -8,11 +8,13 @@ import (
 	"net/url"
 	"os"
 	"strings"
+
+	"gopkg.in/fatih/set.v0"
 )
 
 var (
 	ErrUserAlreadyPresent = errors.New("user is already present")
-    ErrUserDoesNotExist = errors.New("user does not exist")
+	ErrUserDoesNotExist   = errors.New("user does not exist")
 )
 
 type EachUserHandler func(authyID string, publicKey string)
@@ -42,6 +44,15 @@ func (manager *UsersManager) EachUser(fn EachUserHandler) error {
 	return nil
 }
 
+func (manager *UsersManager) UserIDList() []string {
+	s := set.New()
+	manager.EachUser(func(authyID string, publicKey string) {
+		s.Add(authyID)
+	})
+
+	return set.StringSlice(s)
+}
+
 func (manager *UsersManager) HasUser(userID string) bool {
 	found := false
 	manager.EachUser(func(authyID string, publicKey string) {
@@ -52,6 +63,28 @@ func (manager *UsersManager) HasUser(userID string) bool {
 	})
 
 	return found
+}
+
+func (manager *UsersManager) GetUser(userID string) *User {
+	user := &User{}
+	matchingKeys := make([]string, 0)
+
+	manager.EachUser(func(authyID string, publicKey string) {
+		if authyID == userID {
+			if len(strings.Trim(publicKey, " ")) != 0 {
+				matchingKeys = append(matchingKeys, publicKey)
+			}
+		}
+	})
+
+	if len(matchingKeys) == 0 {
+		return nil
+	}
+
+	user.PublicKeys = matchingKeys
+	user.AuthyID = userID
+
+	return user
 }
 
 func (manager *UsersManager) AddUser(email string, countryCode int, phoneNumber string, publicKey string) error {
@@ -88,19 +121,19 @@ func (manager *UsersManager) AddUserID(authyID string, publicKey string) error {
 }
 
 func (manager *UsersManager) AddKey(authyID string, publicKey string) error {
-    if manager.HasUser(authyID) != true {
-        return ErrUserDoesNotExist
-    }
+	if manager.HasUser(authyID) != true {
+		return ErrUserDoesNotExist
+	}
 
-    file, err := os.OpenFile(usersDbPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
-    if err != nil {
-        return err
-    }
+	file, err := os.OpenFile(usersDbPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
 
-    defer file.Close()
+	defer file.Close()
 
-    _, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
-    return err
+	_, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
+	return err
 }
 
 func usersDbPath() string {
