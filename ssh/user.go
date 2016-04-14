@@ -75,40 +75,6 @@ func (user *User) AuthyIDStr() string {
 	return user.AuthyID
 }
 
-// ToMap converts the user to a map
-func (user *User) ToMap() DatabaseData {
-	return DatabaseData{
-		"Username":    user.Username,
-		"AuthyID":     user.AuthyID,
-		"Email":       user.Email,
-		"PublicKeys":  user.PublicKeys,
-		"CountryCode": user.CountryCode,
-		"PhoneNumber": user.PhoneNumber,
-	}
-}
-
-// FromMap loads the user using a map.
-func (user *User) FromMap(data DatabaseData) {
-	if value := data["Username"]; value != nil {
-		user.Username = value.(string)
-	}
-	if value := data["AuthyID"]; value != nil {
-		user.AuthyID = value.(string)
-	}
-	if value := data["Email"]; value != nil {
-		user.Email = value.(string)
-	}
-	if value := data["CountryCode"]; value != nil {
-		user.CountryCode = value.(int)
-	}
-	if value := data["PhoneNumber"]; value != nil {
-		user.PhoneNumber = value.(string)
-	}
-	if value := data["PublicKeys"]; value != nil {
-		user.PublicKeys = value.([]string)
-	}
-}
-
 // Register register the user on Authy
 func (user *User) Register() error {
 	if len(user.PhoneNumber) == 0 || user.CountryCode == 0 {
