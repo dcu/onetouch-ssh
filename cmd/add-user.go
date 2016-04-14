@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// add-userCmd represents the add-user command
+// addUserCmd represents the add-user command
 var addUserCmd = &cobra.Command{
 	Use:   "add-user <email> <country code> <phone number> <public ssh key>",
 	Short: "Add user to be authenticated with 2FA for the current unix account",
@@ -50,7 +50,7 @@ Note: Newly added users will not be enabled automatically -- they will be enable
 
 		countryCode, err := strconv.Atoi(args[1])
 		if err != nil {
-			fmt.Printf("Country code %s is invalid: %s", args[1], err)
+			fmt.Printf("Country code %s is invalid: %s\n", args[1], err)
 			os.Exit(1)
 		}
 
@@ -58,7 +58,7 @@ Note: Newly added users will not be enabled automatically -- they will be enable
 		publicKey := strings.Join(args[3:], " ")
 		err = usersManager.AddUser(args[0], countryCode, args[2], publicKey)
 		if err != nil {
-			fmt.Printf("Error adding user: %s", err)
+			fmt.Printf("Error adding user: %s\n", err)
 			os.Exit(1)
 		}
 	},

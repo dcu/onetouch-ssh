@@ -29,7 +29,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// add-userCmd represents the add-user command
+// addKeyCmd represents the add-key command
 var addKeyCmd = &cobra.Command{
 	Use:   "add-key <authy id> <ssh public key>",
 	Short: "Adds a public key to a user.",
@@ -48,7 +48,7 @@ Example:
 		publicKey := strings.Join(args[1:], " ")
 		err := usersManager.AddKey(args[0], publicKey)
 		if err != nil {
-			fmt.Printf("Error adding key to user: %s", err)
+			fmt.Printf("Error adding key to user: %s\n", err)
 			os.Exit(1)
 		}
 	},
