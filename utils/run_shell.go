@@ -24,6 +24,26 @@ func RunShell() {
 	}
 }
 
+func RunShellFromPath(shellPath string) {
+	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
+		shellName := filepath.Base(shellPath)
+		detachCommand(shellPath, shellName, "-c", sshCommand)
+	} else {
+		detachCommand(shellPath)
+	}
+}
+
+func RunShellFromPathWithArgs(shellPath string, shellArgs []string) {
+	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
+		shellName := filepath.Base(shellPath)
+		detachCommand(shellPath, shellName, "-c", sshCommand)
+	} else {
+		shellCommand := make([]string, 0)
+		shellCommand = append(shellCommand, shellPath)
+		shellCommand = append(shellCommand, shellArgs...)
+		detachCommand(shellCommand...)
+	}
+}
 func waitPid(pid int) {
 	for {
 		var ws syscall.WaitStatus

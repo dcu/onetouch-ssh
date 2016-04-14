@@ -74,12 +74,29 @@ func (verification *Verification) Run() error {
 }
 
 func runShell() {
-	utils.PrintMessage("You've been logged in successfully.\n")
-	utils.RunShell()
+	config, err := LoadConfig()
+	// Check if the config could be loaded to get preferred user shell.
+	if err == nil {
+		utils.PrintMessage("You've been logged in successfully.\n")
+		if len(config.ShellPath) != 0 {
+			if len(config.ShellArgs) != 0 {
+				utils.RunShellFromPathWithArgs(
+					config.ShellPath,
+					config.ShellArgs)
+			} else {
+				utils.RunShellFromPath(config.ShellPath)
+			}
+		} else {
+			utils.RunShell()
+		}
+	} else {
+		utils.RunShell()
+	}
 }
 
 func (verification *Verification) SendOneTouchRequest() (*authy.ApprovalRequest, error) {
-	hostname := utils.RunCommand("hostname")
+	// Better error handling on RunCommand?
+	hostname := utils.RunCommand("hostname", "-f") // Use -f to get FQDN
 	sshConnection := strings.Split(os.Getenv("SSH_CONNECTION"), " ")
 	clientIP := ""
 	serverIP := ""
@@ -107,11 +124,11 @@ func (verification *Verification) SendOneTouchRequest() (*authy.ApprovalRequest,
 			message = fmt.Sprintf("git %s on %s", typ, hostname)
 			details["Repository"] = repo
 		} else {
-			message = fmt.Sprintf("You are executing command on %s", hostname)
+			message = fmt.Sprintf("Executing command on: %s", hostname)
 			details["Command"] = command
 		}
 	} else {
-		message = fmt.Sprintf("You are login to %s", hostname)
+		message = fmt.Sprintf("Logging in to: %s", hostname)
 	}
 
 	return verification.api.SendApprovalRequest(verification.authyID, message, details, url.Values{})

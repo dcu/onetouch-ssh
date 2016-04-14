@@ -14,13 +14,19 @@ var (
 
 // Config contains the configuration of the app.
 type Config struct {
-	APIKey string `yaml:"api_key"`
+	APIKey    string   `yaml:"api_key"`
+	ShellPath string   `yaml:"shell"`
+	ShellArgs []string `yaml:"shell_args"`
 }
 
 func NewConfig(apiKey string) *Config {
 	config := &Config{
 		APIKey: apiKey,
 	}
+
+	// Find some other safe default?
+	config.ShellPath = "/bin/sh"
+	config.ShellArgs = make([]string, 0)
 
 	return config
 }
