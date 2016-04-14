@@ -13,11 +13,18 @@ import (
 )
 
 var (
+	// ErrUserAlreadyPresent is returned when the user already exists in the db.
 	ErrUserAlreadyPresent = errors.New("user is already present")
-	ErrUserDoesNotExist   = errors.New("user does not exist")
+
+	// ErrUserDoesNotExist is returned when the user doesn't exist in the db.
+	ErrUserDoesNotExist = errors.New("user does not exist")
 )
 
-type EachUserHandler func(authyID string, publicKey string)
+// EachEntryHandler is function prototype for the EachEntry callback
+type EachEntryHandler func(authyID string, publicKey string)
+
+// EachUserHandler is function prototype for the EachUser callback
+type EachUserHandler func(user *User)
 
 // UsersManager is in charge of adding/deleting/updating/listing users
 type UsersManager struct {
@@ -28,7 +35,8 @@ func NewUsersManager() *UsersManager {
 	return &UsersManager{}
 }
 
-func (manager *UsersManager) EachUser(fn EachUserHandler) error {
+// EachEntry goes through every entry in the users db and calls fn with it.
+func (manager *UsersManager) EachEntry(fn EachEntryHandler) error {
 	file, err := os.Open(usersDbPath())
 	if err != nil {
 		return err
@@ -44,18 +52,32 @@ func (manager *UsersManager) EachUser(fn EachUserHandler) error {
 	return nil
 }
 
+// EachUser goes through every user in the users db and calls fn with it.
+func (manager *UsersManager) EachUser(fn EachUserHandler) error {
+	userIDs := manager.UserIDList()
+	for _, userID := range userIDs {
+		user := FindUser(userID)
+		if user != nil {
+			fn(user)
+		}
+	}
+	return nil
+}
+
+// UserIDList returns the list of user ids present in the users db.
 func (manager *UsersManager) UserIDList() []string {
 	s := set.New()
-	manager.EachUser(func(authyID string, publicKey string) {
+	manager.EachEntry(func(authyID string, publicKey string) {
 		s.Add(authyID)
 	})
 
 	return set.StringSlice(s)
 }
 
+// HasUser returns true if the user is present in the local db.
 func (manager *UsersManager) HasUser(userID string) bool {
 	found := false
-	manager.EachUser(func(authyID string, publicKey string) {
+	manager.EachEntry(func(authyID string, publicKey string) {
 		if authyID == userID {
 			found = true
 			return
@@ -65,28 +87,7 @@ func (manager *UsersManager) HasUser(userID string) bool {
 	return found
 }
 
-func (manager *UsersManager) GetUser(userID string) *User {
-	user := &User{}
-	matchingKeys := make([]string, 0)
-
-	manager.EachUser(func(authyID string, publicKey string) {
-		if authyID == userID {
-			if len(strings.Trim(publicKey, " ")) != 0 {
-				matchingKeys = append(matchingKeys, publicKey)
-			}
-		}
-	})
-
-	if len(matchingKeys) == 0 {
-		return nil
-	}
-
-	user.PublicKeys = matchingKeys
-	user.AuthyID = userID
-
-	return user
-}
-
+// AddUser adds a user to the users db.
 func (manager *UsersManager) AddUser(email string, countryCode int, phoneNumber string, publicKey string) error {
 	api, err := LoadAuthyAPI()
 	if err != nil {
@@ -105,6 +106,7 @@ func (manager *UsersManager) AddUser(email string, countryCode int, phoneNumber 
 	return manager.AddUserID(user.ID, publicKey)
 }
 
+// AddUserID adds a user id to the users db.
 func (manager *UsersManager) AddUserID(authyID string, publicKey string) error {
 	if manager.HasUser(authyID) {
 		return ErrUserAlreadyPresent
@@ -120,6 +122,7 @@ func (manager *UsersManager) AddUserID(authyID string, publicKey string) error {
 	return err
 }
 
+// AddKey associates a key to the given user id.
 func (manager *UsersManager) AddKey(authyID string, publicKey string) error {
 	if manager.HasUser(authyID) != true {
 		return ErrUserDoesNotExist

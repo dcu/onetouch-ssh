@@ -45,11 +45,9 @@ Example:
 		}
 
 		usersManager := ssh.NewUsersManager()
-		users := usersManager.UserIDList()
 
 		fmt.Printf("%16s\t%-24s\t %-48s\n", "Authy ID", "Key Comment", "Public Key")
-		for i := 0; i < len(users); i++ {
-			user := usersManager.GetUser(users[i])
+		usersManager.EachUser(func(user *ssh.User) {
 			for j := 0; j < len(user.PublicKeys); j++ {
 				fingerprint, comment := utils.PublicKeyFingerprint(user.PublicKeys[j])
 				fmt.Printf(
@@ -58,7 +56,7 @@ Example:
 					comment,
 					fingerprint)
 			}
-		}
+		})
 	},
 }
 
