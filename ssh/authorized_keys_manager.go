@@ -47,7 +47,7 @@ func (manager *AuthorizedKeysManager) Write(f io.Writer) error {
 
 	// FIXME: keep the old contents.
 	w.WriteString("### onetouch-ssh\n")
-	usersManager.EachUser(func(authyID string, publicKey string) {
+	usersManager.EachEntry(func(authyID string, publicKey string) {
 		if len(publicKey) == 0 {
 			return
 		}
