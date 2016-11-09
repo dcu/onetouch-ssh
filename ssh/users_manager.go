@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
 	"gopkg.in/fatih/set.v0"
@@ -120,6 +121,39 @@ func (manager *UsersManager) AddUserID(authyID string, publicKey string) error {
 
 	_, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
 	return err
+}
+
+// RemoveUser removes the user with the given `authyID`
+func (manager *UsersManager) RemoveUser(authyID string) error {
+	if match, err := regexp.MatchString(`\A[0-9]+\z`, authyID); !match || err != nil {
+		return errors.New("invalid authy id")
+	}
+
+	tmpFile, err := os.OpenFile(usersDbPath()+".tmp", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+	defer tmpFile.Close()
+
+	file, err := os.Open(usersDbPath())
+	if err != nil {
+		return err
+	}
+
+	reader := bufio.NewScanner(file)
+	for reader.Scan() {
+		line := reader.Text()
+		if strings.HasPrefix(line, authyID+" ") {
+			// ignore
+			continue
+		}
+		tmpFile.WriteString(line)
+	}
+
+	file.Close()
+	tmpFile.Close()
+
+	return os.Rename(tmpFile.Name(), file.Name())
 }
 
 // AddKey associates a key to the given user id.
