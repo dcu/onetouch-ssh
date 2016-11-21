@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"regexp"
@@ -94,7 +95,6 @@ func (manager *UsersManager) AddUser(email string, countryCode int, phoneNumber 
 	if err != nil {
 		return err
 	}
-	publicKey = strings.Replace(publicKey, "\n", "", -1)
 
 	user, err := api.RegisterUser(email, countryCode, phoneNumber, url.Values{})
 	if err != nil {
@@ -113,14 +113,7 @@ func (manager *UsersManager) AddUserID(authyID string, publicKey string) error {
 		return ErrUserAlreadyPresent
 	}
 
-	file, err := os.OpenFile(usersDbPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
-	return err
+	return manager.AddKey(authyID, publicKey)
 }
 
 // RemoveUser removes the user with the given `authyID`
@@ -158,9 +151,17 @@ func (manager *UsersManager) RemoveUser(authyID string) error {
 
 // AddKey associates a key to the given user id.
 func (manager *UsersManager) AddKey(authyID string, publicKey string) error {
-	if manager.HasUser(authyID) != true {
-		return ErrUserDoesNotExist
+	if _, err := os.Stat(publicKey); err == nil { // publicKey is a file
+		publicKeyData, err := ioutil.ReadFile(publicKey)
+		if err != nil {
+			return err
+		}
+
+		publicKey = string(publicKeyData)
 	}
+
+	// clean up public key
+	publicKey = strings.Replace(publicKey, "\n", "", -1)
 
 	file, err := os.OpenFile(usersDbPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
