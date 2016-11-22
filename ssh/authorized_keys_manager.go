@@ -27,13 +27,19 @@ func (manager *AuthorizedKeysManager) WriteToDefaultLocation() error {
 	home := utils.FindUserHome()
 	// FIXME: create the .ssh dir if it doesn't exist.
 
-	file, err := os.Create(home + "/.ssh/authorized_keys")
+	filename := home + "/.ssh/authorized_keys"
+	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	return manager.Write(file)
+	err = manager.Write(file)
+	if err != nil {
+		return err
+	}
+
+	return os.Chmod(filename, 0600)
 }
 
 func (manager *AuthorizedKeysManager) Write(f io.Writer) error {
