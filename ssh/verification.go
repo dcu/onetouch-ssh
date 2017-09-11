@@ -96,7 +96,7 @@ func runShell() {
 
 func (verification *Verification) SendOneTouchRequest() (*authy.ApprovalRequest, error) {
 	// Better error handling on RunCommand?
-	hostname := os.Hostname()
+	hostname := utils.RunCommand("hostname", "-f") // Use -f to get FQDN
 	sshConnection := strings.Split(os.Getenv("SSH_CONNECTION"), " ")
 	clientIP := ""
 	serverIP := ""
