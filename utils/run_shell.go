@@ -28,12 +28,14 @@ func RunShellFromPath(shellPath string) {
 // RunShellFromPathWithArgs runs a shell given the given arguments
 func RunShellFromPathWithArgs(shellPath string, shellArgs []string) {
 	var err error
+	shellName := filepath.Base(shellPath)
 	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
-		shellName := filepath.Base(shellPath)
 		err = detachCommand(shellPath, shellName, "-c", sshCommand)
 	} else {
-		shellCommand := make([]string, 0)
-		shellCommand = append(shellCommand, shellPath)
+		shellCommand := []string{
+			shellPath,
+			shellName,
+		}
 		shellCommand = append(shellCommand, shellArgs...)
 		err = detachCommand(shellCommand...)
 	}
