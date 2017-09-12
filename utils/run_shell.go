@@ -17,32 +17,12 @@ var (
 func RunShell() {
 	shell := os.Getenv("SHELL")
 
-	var err error
-	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
-		shellName := filepath.Base(shell)
-		err = detachCommand(shell, shellName, "-c", sshCommand)
-	} else if shell != "" {
-		err = detachCommand(shell)
-	}
-
-	if err != nil {
-		panic(err)
-	}
+	RunShellFromPath(shell)
 }
 
 // RunShellFromPath runs a given shell
 func RunShellFromPath(shellPath string) {
-	var err error
-	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
-		shellName := filepath.Base(shellPath)
-		err = detachCommand(shellPath, shellName, "-c", sshCommand)
-	} else {
-		err = detachCommand(shellPath)
-	}
-
-	if err != nil {
-		panic(err)
-	}
+	RunShellFromPathWithArgs(shellPath, []string{})
 }
 
 // RunShellFromPathWithArgs runs a shell given the given arguments
@@ -59,7 +39,8 @@ func RunShellFromPathWithArgs(shellPath string, shellArgs []string) {
 	}
 
 	if err != nil {
-		panic(err)
+		fmt.Printf("Failed to run `%s %v`: %s\n", shellPath, shellArgs, err.Error())
+		os.Exit(1)
 	}
 }
 func waitPid(pid int) error {
