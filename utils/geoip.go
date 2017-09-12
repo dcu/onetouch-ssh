@@ -104,7 +104,10 @@ func FormatIPAndLocation(ip string) string {
 }
 
 func parseGeoIPResponse(response *http.Response) (*gabs.Container, error) {
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err

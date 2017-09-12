@@ -16,56 +16,73 @@ var (
 func RunShell() {
 	shell := os.Getenv("SHELL")
 
+	var err error
 	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
 		shellName := filepath.Base(shell)
-		detachCommand(shell, shellName, "-c", sshCommand)
+		err = detachCommand(shell, shellName, "-c", sshCommand)
 	} else if shell != "" {
-		detachCommand(shell)
+		err = detachCommand(shell)
+	}
+
+	if err != nil {
+		panic(err)
 	}
 }
 
 func RunShellFromPath(shellPath string) {
+	var err error
 	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
 		shellName := filepath.Base(shellPath)
-		detachCommand(shellPath, shellName, "-c", sshCommand)
+		err = detachCommand(shellPath, shellName, "-c", sshCommand)
 	} else {
-		detachCommand(shellPath)
+		err = detachCommand(shellPath)
+	}
+
+	if err != nil {
+		panic(err)
 	}
 }
 
 func RunShellFromPathWithArgs(shellPath string, shellArgs []string) {
+	var err error
 	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
 		shellName := filepath.Base(shellPath)
-		detachCommand(shellPath, shellName, "-c", sshCommand)
+		err = detachCommand(shellPath, shellName, "-c", sshCommand)
 	} else {
 		shellCommand := make([]string, 0)
 		shellCommand = append(shellCommand, shellPath)
 		shellCommand = append(shellCommand, shellArgs...)
-		detachCommand(shellCommand...)
+		err = detachCommand(shellCommand...)
+	}
+
+	if err != nil {
+		panic(err)
 	}
 }
-func waitPid(pid int) {
+func waitPid(pid int) error {
 	for {
 		var ws syscall.WaitStatus
 		_, err := syscall.Wait4(pid, &ws, 0, nil)
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		if ws.Exited() {
 			break
 		}
 	}
+
+	return nil
 }
 
 func closePorts() {
-	os.Stdin.Close()
-	os.Stdout.Close()
-	os.Stderr.Close()
+	_ = os.Stdin.Close()
+	_ = os.Stdout.Close()
+	_ = os.Stderr.Close()
 }
 
-func detachCommand(command ...string) {
+func detachCommand(command ...string) error {
 	sys := syscall.SysProcAttr{}
 	files := []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()}
 	attr := syscall.ProcAttr{
@@ -77,11 +94,11 @@ func detachCommand(command ...string) {
 	pid, err := syscall.ForkExec(command[0], command[1:], &attr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		return
+		return err
 	}
 
 	closePorts()
-	waitPid(pid)
+	return waitPid(pid)
 }
 
 func RunCommand(command ...string) string {
