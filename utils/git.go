@@ -1,5 +1,6 @@
 package utils
 
+// ParseGitCommand rturns the type of the operation and the repo given a git command
 func ParseGitCommand(command string) (typ string, repo string) {
 	result := gitCmdRx.FindStringSubmatch(command)
 

@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	// DataPath is the default path to read the config from.
 	DataPath = utils.FindUserHome() + "/.authy-onetouch"
 )
 
@@ -19,6 +20,7 @@ type Config struct {
 	ShellArgs []string `yaml:"shell_args"`
 }
 
+// NewConfig builds a new config object.
 func NewConfig(apiKey string) *Config {
 	config := &Config{
 		APIKey: apiKey,
@@ -31,6 +33,7 @@ func NewConfig(apiKey string) *Config {
 	return config
 }
 
+// LoadConfig loads the default config
 func LoadConfig() (*Config, error) {
 	data, err := ioutil.ReadFile(configDbFile())
 	if err != nil {
@@ -47,6 +50,7 @@ func LoadConfig() (*Config, error) {
 	return config, nil
 }
 
+// Save stores the current config
 func (config *Config) Save() error {
 	data, err := yaml.Marshal(config)
 	if err != nil {
@@ -61,5 +65,5 @@ func configDbFile() string {
 }
 
 func init() {
-	os.MkdirAll(DataPath, 0700)
+	_ = os.MkdirAll(DataPath, 0700)
 }

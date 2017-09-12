@@ -26,7 +26,7 @@ func FindUser(userID string) *User {
 	matchingKeys := []string{}
 
 	usersManager := NewUsersManager()
-	usersManager.EachEntry(func(authyID string, publicKey string) {
+	_ = usersManager.EachEntry(func(authyID string, publicKey string) {
 		if authyID == userID {
 			if len(strings.Trim(publicKey, " ")) != 0 {
 				matchingKeys = append(matchingKeys, publicKey)

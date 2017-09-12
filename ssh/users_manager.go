@@ -43,7 +43,9 @@ func (manager *UsersManager) EachEntry(fn EachEntryHandler) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -69,7 +71,7 @@ func (manager *UsersManager) EachUser(fn EachUserHandler) error {
 // UserIDList returns the list of user ids present in the users db.
 func (manager *UsersManager) UserIDList() []string {
 	s := set.New()
-	manager.EachEntry(func(authyID string, publicKey string) {
+	_ = manager.EachEntry(func(authyID string, publicKey string) {
 		s.Add(authyID)
 	})
 
@@ -79,7 +81,7 @@ func (manager *UsersManager) UserIDList() []string {
 // HasUser returns true if the user is present in the local db.
 func (manager *UsersManager) HasUser(userID string) bool {
 	found := false
-	manager.EachEntry(func(authyID string, publicKey string) {
+	_ = manager.EachEntry(func(authyID string, publicKey string) {
 		if authyID == userID {
 			found = true
 			return
@@ -126,7 +128,9 @@ func (manager *UsersManager) RemoveUser(authyID string) error {
 	if err != nil {
 		return err
 	}
-	defer tmpFile.Close()
+	defer func() {
+		_ = tmpFile.Close()
+	}()
 
 	file, err := os.Open(usersDbPath())
 	if err != nil {
@@ -140,11 +144,11 @@ func (manager *UsersManager) RemoveUser(authyID string) error {
 			// ignore
 			continue
 		}
-		tmpFile.WriteString(line)
+		_, _ = tmpFile.WriteString(line)
 	}
 
-	file.Close()
-	tmpFile.Close()
+	_ = file.Close()
+	_ = tmpFile.Close()
 
 	return os.Rename(tmpFile.Name(), file.Name())
 }
@@ -168,7 +172,9 @@ func (manager *UsersManager) AddKey(authyID string, publicKey string) error {
 		return err
 	}
 
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	_, err = file.WriteString(fmt.Sprintf("%s %s\n", authyID, publicKey))
 	return err

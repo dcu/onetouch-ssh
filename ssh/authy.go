@@ -4,6 +4,7 @@ import (
 	"github.com/dcu/go-authy"
 )
 
+// LoadAuthyAPI loads a client to connect to the Authy api.
 func LoadAuthyAPI() (*authy.Authy, error) {
 	config, err := LoadConfig()
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// IsInteractiveConnection returns true if the terminal is interactive
 func IsInteractiveConnection() bool {
 	term := os.Getenv("TERM")
 
@@ -15,6 +16,7 @@ func IsInteractiveConnection() bool {
 	return false
 }
 
+// PrintMessage prints a message only if the terminal is interactive, otherwise the message is ignored.
 func PrintMessage(message string, args ...interface{}) {
 	if IsInteractiveConnection() {
 		fmt.Printf(message, args...)

@@ -32,7 +32,9 @@ func (manager *AuthorizedKeysManager) WriteToDefaultLocation() error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	err = manager.Write(file)
 	if err != nil {
@@ -52,20 +54,20 @@ func (manager *AuthorizedKeysManager) Write(f io.Writer) error {
 	}
 
 	// FIXME: keep the old contents.
-	w.WriteString("### onetouch-ssh\n")
-	usersManager.EachEntry(func(authyID string, publicKey string) {
+	_, _ = w.WriteString("### onetouch-ssh\n")
+	_ = usersManager.EachEntry(func(authyID string, publicKey string) {
 		if len(publicKey) == 0 {
 			return
 		}
 
-		w.WriteString("# " + authyID + "\n")
+		_, _ = w.WriteString("# " + authyID + "\n")
 		publicKey = strings.Trim(publicKey, " ")
 		cmd := fmt.Sprintf("%s %s %s", authyShell, "shell", authyID)
-		w.WriteString(`command="` + cmd + `" ` + publicKey + "\n")
+		_, _ = w.WriteString(`command="` + cmd + `" ` + publicKey + "\n")
 	})
 
-	w.WriteString("###\n")
-	w.Flush()
+	_, _ = w.WriteString("###\n")
+	_ = w.Flush()
 	return nil
 }
 
@@ -76,7 +78,9 @@ func (manager *AuthorizedKeysManager) Contains(text string) bool {
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -90,5 +94,5 @@ func (manager *AuthorizedKeysManager) Contains(text string) bool {
 
 // Dump prints the authorized keys file in the stdout.
 func (manager *AuthorizedKeysManager) Dump() {
-	manager.Write(os.Stdout)
+	_ = manager.Write(os.Stdout)
 }

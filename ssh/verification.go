@@ -17,17 +17,22 @@ import (
 )
 
 var (
-	ApprovalTimeout        = 45 * time.Second
-	cleanCodeRegexp        = regexp.MustCompile(`[^\d+]`)
-	MaxAttemptsToReadCode  = 3
+	// ApprovalTimeout is the time that the user has to approve the request
+	ApprovalTimeout = 45 * time.Second
+	cleanCodeRegexp = regexp.MustCompile(`[^\d+]`)
+	// MaxAttemptsToReadCode is the times the user is prompted to read the code
+	MaxAttemptsToReadCode = 3
+	// ErrInvalidVerification is returned when the verification is invalid
 	ErrInvalidVerification = errors.New("invalid verification")
 )
 
+// Verification is an authy verification
 type Verification struct {
 	api     *authy.Authy
 	authyID string
 }
 
+// NewVerification builds a new verification for the given authy id.
 func NewVerification(authyID string) *Verification {
 	api, err := LoadAuthyAPI()
 	if err != nil {
@@ -40,6 +45,7 @@ func NewVerification(authyID string) *Verification {
 	}
 }
 
+// Run starts the verification process
 func (verification *Verification) Run() error {
 	utils.PrintMessage("Sending approval request to your device... ")
 	request, err := verification.SendOneTouchRequest()
@@ -94,6 +100,7 @@ func runShell() {
 	}
 }
 
+// SendOneTouchRequest sends an approval request to the user.
 func (verification *Verification) SendOneTouchRequest() (*authy.ApprovalRequest, error) {
 	// Get hostname, in case errot just use Unknown
 	hostname, err := os.Hostname()

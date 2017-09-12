@@ -13,6 +13,7 @@ var (
 	gitCmdRx = regexp.MustCompile(`^(git-receive-pack|git-upload-pack) '(.*)'$`)
 )
 
+// RunShell runs the shell indicated in the $SHELL env var
 func RunShell() {
 	shell := os.Getenv("SHELL")
 
@@ -29,6 +30,7 @@ func RunShell() {
 	}
 }
 
+// RunShellFromPath runs a given shell
 func RunShellFromPath(shellPath string) {
 	var err error
 	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
@@ -43,6 +45,7 @@ func RunShellFromPath(shellPath string) {
 	}
 }
 
+// RunShellFromPathWithArgs runs a shell given the given arguments
 func RunShellFromPathWithArgs(shellPath string, shellArgs []string) {
 	var err error
 	if sshCommand := os.Getenv("SSH_ORIGINAL_COMMAND"); sshCommand != "" {
@@ -101,6 +104,7 @@ func detachCommand(command ...string) error {
 	return waitPid(pid)
 }
 
+// RunCommand runns the given command and arguments
 func RunCommand(command ...string) string {
 	output, err := exec.Command(command[0], command[1:]...).Output()
 	if err != nil {

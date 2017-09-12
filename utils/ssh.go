@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// Helper function to get the fingerprint of a SSH public key
+// PublicKeyFingerprint Helper function to get the fingerprint of a SSH public key
 func PublicKeyFingerprint(pubkey string) (string, string) {
 	byteString := []byte(pubkey)
 
@@ -22,6 +22,7 @@ func PublicKeyFingerprint(pubkey string) (string, string) {
 	return fingerprint, comment
 }
 
+// Rfc4716Hex returns the data in hex format separated by ":"
 func Rfc4716Hex(data []byte) string {
 	var fingerprint string
 	for i := 0; i < len(data); i++ {
