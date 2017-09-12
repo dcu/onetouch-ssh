@@ -1,0 +1,48 @@
+hash: 358eb2fe1f671c9a7450b212e4d5541750e16fa906a7d9f4c45b9544a2c5166a
+updated: 2017-09-12T11:15:02.34392959-05:00
+imports:
+- name: github.com/dcu/go-authy
+  version: cf5da24b7e71a594d7cec54206d180ff0d5bc380
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/Jeffail/gabs
+  version: 2a3aa15961d5fee6047b8151b67ac2f08ba2c48c
+- name: github.com/mattn/go-colorable
+  version: ad5389df28cdac544c99bd7b9161a0b5b6ca9d1b
+- name: github.com/mattn/go-isatty
+  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+- name: github.com/mgutz/ansi
+  version: 9520e82c474b0a04dd04f8a40959027271bab992
+- name: github.com/spf13/cobra
+  version: b78744579491c1ceeaaa3b40205e56b0591b93a3
+- name: github.com/spf13/pflag
+  version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
+- name: golang.org/x/crypto
+  version: 88e95fbb56610f02dbc78ebc3b207bec8cf56b86
+  subpackages:
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
+  - ssh
+- name: golang.org/x/sys
+  version: 7a85bfad8bb9558204b9cc9b3624680d2d443a35
+  subpackages:
+  - unix
+- name: gopkg.in/fatih/set.v0
+  version: 27c40922c40b43fe04554d8223a402af3ea333f3
+- name: gopkg.in/yaml.v2
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  subpackages:
+  - assert
+  - require
