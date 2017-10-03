@@ -1,8 +1,8 @@
 hash: 358eb2fe1f671c9a7450b212e4d5541750e16fa906a7d9f4c45b9544a2c5166a
-updated: 2017-09-12T11:15:02.34392959-05:00
+updated: 2017-10-03T07:48:27.929647952-05:00
 imports:
 - name: github.com/dcu/go-authy
-  version: cf5da24b7e71a594d7cec54206d180ff0d5bc380
+  version: 87482e154bde3f95338a7ba0947222b4e98b836a
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Jeffail/gabs
@@ -10,7 +10,7 @@ imports:
 - name: github.com/mattn/go-colorable
   version: ad5389df28cdac544c99bd7b9161a0b5b6ca9d1b
 - name: github.com/mattn/go-isatty
-  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+  version: a5cdd64afdee435007ee3e9f6ed4684af949d568
 - name: github.com/mgutz/ansi
   version: 9520e82c474b0a04dd04f8a40959027271bab992
 - name: github.com/spf13/cobra
@@ -18,14 +18,14 @@ imports:
 - name: github.com/spf13/pflag
   version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
 - name: golang.org/x/crypto
-  version: 88e95fbb56610f02dbc78ebc3b207bec8cf56b86
+  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
   - curve25519
   - ed25519
   - ed25519/internal/edwards25519
   - ssh
 - name: golang.org/x/sys
-  version: 7a85bfad8bb9558204b9cc9b3624680d2d443a35
+  version: b6e1ae21643682ce023deb8d152024597b0e9bb4
   subpackages:
   - unix
 - name: gopkg.in/fatih/set.v0
