@@ -4,6 +4,7 @@ import (
 	"github.com/dcu/go-authy"
 	"log"
 	"os"
+	"os/user"
 )
 
 var (
@@ -12,7 +13,12 @@ var (
 )
 
 func init() {
-	logFile, err := os.OpenFile(`/tmp/onetouch.log`, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	user, err := user.Current()
+        if err != nil {
+                panic(err)
+        }
+        uid := user.Uid
+	logFile, err := os.OpenFile(`/tmp/onetouch-` + uid + `.log`, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		panic(err)
 	}
