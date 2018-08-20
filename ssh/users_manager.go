@@ -70,7 +70,7 @@ func (manager *UsersManager) EachUser(fn EachUserHandler) error {
 
 // UserIDList returns the list of user ids present in the users db.
 func (manager *UsersManager) UserIDList() []string {
-	s := set.New()
+	s := set.New(set.ThreadSafe)
 	_ = manager.EachEntry(func(authyID string, publicKey string) {
 		s.Add(authyID)
 	})

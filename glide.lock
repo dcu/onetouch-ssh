@@ -1,37 +1,48 @@
-hash: 358eb2fe1f671c9a7450b212e4d5541750e16fa906a7d9f4c45b9544a2c5166a
-updated: 2017-10-03T07:48:27.929647952-05:00
+hash: a580f28eeda1b01a96872487236a451e64aadab1ed38adec7e03c922a717d174
+updated: 2018-08-20T12:42:58.185549487-05:00
 imports:
 - name: github.com/dcu/go-authy
-  version: 87482e154bde3f95338a7ba0947222b4e98b836a
+  version: 0c8491e20fe9225f4902f789480d7166eab098f7
+- name: github.com/gojektech/heimdall
+  version: 54d43c53c27af9aaedbc8cff538ee523a8973bda
+  subpackages:
+  - httpclient
+- name: github.com/gojektech/valkyrie
+  version: b19510f6c63cc7dd1c9d67708e28d5ff18f49351
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Jeffail/gabs
   version: 2a3aa15961d5fee6047b8151b67ac2f08ba2c48c
 - name: github.com/mattn/go-colorable
-  version: ad5389df28cdac544c99bd7b9161a0b5b6ca9d1b
+  version: efa589957cd060542a26d2dd7832fd6a6c6c3ade
 - name: github.com/mattn/go-isatty
-  version: a5cdd64afdee435007ee3e9f6ed4684af949d568
+  version: 6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c
 - name: github.com/mgutz/ansi
   version: 9520e82c474b0a04dd04f8a40959027271bab992
+- name: github.com/pkg/errors
+  version: 816c9085562cd7ee03e7f8188a1cfd942858cded
 - name: github.com/spf13/cobra
-  version: b78744579491c1ceeaaa3b40205e56b0591b93a3
+  version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
 - name: github.com/spf13/pflag
-  version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
+  version: 3ebe029320b2676d667ae88da602a5f854788a8a
 - name: golang.org/x/crypto
-  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
+  version: 614d502a4dac94afa3a6ce146bd1736da82514c6
   subpackages:
   - curve25519
   - ed25519
   - ed25519/internal/edwards25519
+  - internal/chacha20
+  - internal/subtle
+  - poly1305
   - ssh
 - name: golang.org/x/sys
-  version: b6e1ae21643682ce023deb8d152024597b0e9bb4
+  version: 3dc4335d56c789b04b0ba99b7a37249d9b614314
   subpackages:
   - unix
 - name: gopkg.in/fatih/set.v0
-  version: 27c40922c40b43fe04554d8223a402af3ea333f3
+  version: 2c768e3c5489976167bfc42b5c7c92ca783f4389
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 testImports:
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
