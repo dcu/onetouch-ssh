@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -26,9 +27,15 @@ func NewConfig(apiKey string) *Config {
 		APIKey: apiKey,
 	}
 
-	// Find some other safe default?
-	config.ShellPath = "/bin/sh"
+	shell := os.Getenv("SHELL")
+	if len(shell) == 0 {
+		shell = "/bin/sh"
+	}
+
+	config.ShellPath = shell
 	config.ShellArgs = make([]string, 0)
+
+	fmt.Println("Your users will be logged in a '" + shell + "' shell")
 
 	return config
 }

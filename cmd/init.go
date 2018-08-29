@@ -45,6 +45,7 @@ var initCmd = &cobra.Command{
 
 		config := ssh.NewConfig(apiKey)
 		config.Save()
+		fmt.Println("* You can edit your config at anytime in " + ssh.DataPath + "/config.yml")
 	},
 }
 
